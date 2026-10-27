@@ -1903,6 +1903,11 @@
             <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>
             <span>复制全部</span>
           </button>
+          <span class="path-text-divider" aria-hidden="true"></span>
+          <button type="button" class="text-btn" id="copyScriptBtn" title="复制可运行的 PowerShell 安装脚本（全部变量 + 启用分组的 Path，默认写入当前用户）">
+            <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>
+            <span>复制脚本</span>
+          </button>
         </div>
       </div>
       <div class="path-list" id="pathList" role="list" aria-label="Path 条目列表"></div>
@@ -2322,6 +2327,7 @@
     pathFilterLock: $('pathFilterLock'),
     importPathTextBtn: $('importPathTextBtn'),
     copyPathBtn: $('copyPathBtn'),
+    copyScriptBtn: $('copyScriptBtn'),
     copyVarBtn: $('copyVarBtn'),
     pathList: $('pathList'),
     pathBadge: $('pathBadge'),
@@ -3614,7 +3620,8 @@
       <div class="copy-menu-hint">${esc(label)} · ${vars.length} 变量 · ${paths.length} Path</div>
       <button type="button" class="copy-menu-item" data-copy="vars" ${vars.length ? '' : 'disabled'}>${iconMarkup('i-percent')}复制变量（每行 NAME=VALUE）</button>
       <button type="button" class="copy-menu-item" data-copy="paths" ${paths.length ? '' : 'disabled'}>${iconMarkup('i-route')}复制 Path（分号分隔）</button>
-      <button type="button" class="copy-menu-item" data-copy="all" ${vars.length || paths.length ? '' : 'disabled'}>${iconMarkup('i-copy')}复制本组全部</button>`;
+      <button type="button" class="copy-menu-item" data-copy="all" ${vars.length || paths.length ? '' : 'disabled'}>${iconMarkup('i-copy')}复制本组全部</button>
+      <button type="button" class="copy-menu-item" data-copy="script" title="生成写入变量并合并 PATH 的 PowerShell 脚本" ${vars.length || paths.length ? '' : 'disabled'}>${iconMarkup('i-file')}复制安装脚本（PowerShell）</button>`;
     els.copyMenu.hidden = false;
     const rect = anchor.getBoundingClientRect();
     const menu = els.copyMenu.getBoundingClientRect();
@@ -3626,7 +3633,155 @@
     els.copyMenu.style.top = `${top}px`;
   }
 
+  /* ---------- 可运行的 PowerShell 安装脚本 ---------- */
+
+  function psQuote(value) {
+    return `'${String(value).replace(/[\r\n]+/g, ' ').replace(/'/g, "''")}'`;
+  }
+
+  function installScriptTargets(options = {}) {
+    if (options.everything) {
+      return {
+        variables: state.variables,
+        paths: enabledPaths().map((item) => item.value.trim()).filter(Boolean)
+      };
+    }
+    const groupId = options.groupId || null;
+    return {
+      variables: state.variables.filter((item) => (item.groupId || null) === groupId),
+      paths: groupPathEntries(groupId)
+    };
+  }
+
+  /**
+   * 生成可整块粘进 PowerShell 5.1+ 控制台的安装脚本。
+   * 全文使用 ASCII 文案，避免旧控制台代码页把提示打成乱码；
+   * 不使用 exit，避免粘贴后把用户的控制台窗口关掉。
+   */
+  function buildInstallScript(options = {}) {
+    const { variables, paths } = installScriptTargets(options);
+    const lines = [];
+    lines.push('# === Win Env Studio install script ===');
+    lines.push(`# ${options.everything ? 'Full export' : 'Group export'} | ${variables.length} variable(s) | ${paths.length} PATH entry(ies)`);
+    lines.push('# Generated at ' + new Date().toISOString());
+    lines.push('# Paste this whole block into PowerShell 5.1+ and press Enter, or save it as .ps1 and run it.');
+    lines.push('# Scope User = current account (no admin needed). Machine = all users (run as Administrator).');
+    lines.push('');
+    lines.push("$Scope = 'User'      # 'User' or 'Machine'");
+    lines.push('$Overwrite = $false  # $true = replace existing variables whose value differs');
+    lines.push('$MergePath = $true   # $true = append missing PATH entries, $false = replace PATH');
+    lines.push('');
+    lines.push('$Vars = [ordered]@{');
+    variables.forEach((item) => {
+      lines.push(`  ${psQuote(item.name)} = ${psQuote(item.value)}`);
+    });
+    lines.push('}');
+    lines.push('$Paths = @(');
+    paths.forEach((value) => {
+      lines.push(`  ${psQuote(value)}`);
+    });
+    lines.push(')');
+    lines.push('');
+
+    const body = [
+      "$ErrorActionPreference = 'Stop'",
+      "$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)",
+      "if ($Scope -eq 'Machine' -and -not $isAdmin) { throw 'ERROR: Machine scope requires an elevated PowerShell window.' }",
+      "if ($Scope -eq 'Machine') {",
+      "  $regPath = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment'",
+      "  $regKey = 'HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment'",
+      '} else {',
+      "  $regPath = 'HKCU:\\Environment'",
+      "  $regKey = 'HKCU\\Environment'",
+      '}',
+      "$backupFile = Join-Path $env:TEMP ('env-backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.reg')",
+      '& reg.exe export $regKey $backupFile /y | Out-Null',
+      "if (Test-Path $backupFile) { Write-Host ('Backup saved: ' + $backupFile) -ForegroundColor DarkGray }",
+      '$applied = 0; $skipped = 0; $conflicts = @()',
+      'foreach ($name in $Vars.Keys) {',
+      '  $value = [string]$Vars[$name]',
+      "  $current = [Environment]::GetEnvironmentVariable($name, $Scope)",
+      '  if ($null -ne $current -and $current -eq $value) {',
+      '    $skipped += 1',
+      "    Write-Host ('OK   ' + $name + ' (already up to date)') -ForegroundColor DarkGray",
+      '    continue',
+      '  }',
+      '  if ($null -ne $current -and -not $Overwrite) {',
+      '    $conflicts += $name',
+      '    $skipped += 1',
+      "    Write-Host ('SKIP ' + $name + ' = ' + $current + '  [differs from ' + $value + '; set $Overwrite = $true to replace]') -ForegroundColor Yellow",
+      '    continue',
+      '  }',
+      "  Set-ItemProperty -Path $regPath -Name $name -Value $value -Type ExpandString",
+      '  $applied += 1',
+      "  Write-Host ('SET  ' + $name + ' = ' + $value) -ForegroundColor Green",
+      '}',
+      '$targets = @($Paths | Where-Object { $_ -and $_.Trim() })',
+      'if ($targets.Count -gt 0) {',
+      "  $currentPath = [Environment]::GetEnvironmentVariable('Path', $Scope)",
+      "  $existing = @($currentPath -split ';' | Where-Object { $_ -and $_.Trim() } | ForEach-Object { $_.Trim() })",
+      "  $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)",
+      '  foreach ($item in $existing) { [void]$seen.Add($item) }',
+      '  $missing = @()',
+      '  foreach ($item in $targets) {',
+      '    $trimmed = $item.Trim()',
+      '    if ($trimmed -and $seen.Add($trimmed)) { $missing += $trimmed }',
+      '  }',
+      '  if ($MergePath) {',
+      '    $finalPath = @($existing) + $missing',
+      '  } else {',
+      '    $finalPath = $targets',
+      '    $missing = $targets',
+      '  }',
+      '  if ($missing.Count -gt 0) {',
+      "    Set-ItemProperty -Path $regPath -Name 'Path' -Value ($finalPath -join ';') -Type ExpandString",
+      "    Write-Host ('PATH updated (+' + $missing.Count + ' entries)') -ForegroundColor Green",
+      "  } else { Write-Host 'PATH unchanged (all entries already present).' -ForegroundColor DarkGray }",
+      '}',
+      'try {',
+      "  if (-not ('Win32.EnvBroadcast' -as [type])) {",
+      "    $signature = '[DllImport(\"user32.dll\", CharSet=CharSet.Auto, SetLastError=true)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);'",
+      "    Add-Type -MemberDefinition $signature -Name 'EnvBroadcast' -Namespace 'Win32' | Out-Null",
+      '  }',
+      '  $broadcastResult = [UIntPtr]::Zero',
+      "  [void][Win32.EnvBroadcast]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$broadcastResult)",
+      '} catch {',
+      "  Write-Host 'Environment updated, but the change broadcast failed. Restart apps to pick it up.' -ForegroundColor Yellow",
+      '}',
+      "Write-Host ('Done. applied=' + $applied + ' skipped=' + $skipped) -ForegroundColor Cyan",
+      'if ($conflicts.Count -gt 0) {',
+      "  Write-Host ('Conflicts skipped: ' + ($conflicts -join ', ')) -ForegroundColor Yellow",
+      "  Write-Host 'To replace them, set $Overwrite = $true at the top of this script and run it again.' -ForegroundColor Yellow",
+      '}',
+      "Write-Host ('Restore from backup if needed: reg import \"' + $backupFile + '\"') -ForegroundColor DarkGray",
+      "Write-Host 'Open a new terminal (or sign out) to see the updated environment.' -ForegroundColor DarkGray"
+    ];
+    return lines.concat(body).join('\r\n') + '\r\n';
+  }
+
+  async function copyInstallScript(options = {}) {
+    const { variables, paths } = installScriptTargets(options);
+    if (!variables.length && !paths.length) {
+      showToast('没有可写入的内容（停用分组的 Path 不参与导出）。', { type: 'info' });
+      return;
+    }
+    const copied = await writeClipboardText(buildInstallScript(options));
+    if (!copied) {
+      showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
+      return;
+    }
+    const label = options.everything ? '全部' : `「${groupLabel(options.groupId || null)}」的`;
+    showToast(
+      `已复制${label}安装脚本（${variables.length} 个变量 / ${paths.length} 条 Path），粘贴到 PowerShell 直接运行`,
+      { type: 'success', duration: 5200 }
+    );
+  }
+
   async function copyGroupPart(groupId, part) {
+    if (part === 'script') {
+      await copyInstallScript({ groupId });
+      return;
+    }
     const group = groupId ? groupById(groupId) : null;
     const label = group ? group.name : '未分组';
     const vars = groupVariableLines(groupId);
@@ -4607,6 +4762,7 @@
     els.importPathTextBtn.addEventListener('click', () => openPathTextDialog());
     els.copyPathBtn.addEventListener('click', copyAllPaths);
     els.copyVarBtn.addEventListener('click', copyAllVariables);
+    els.copyScriptBtn.addEventListener('click', () => copyInstallScript({ everything: true }));
 
     els.varSearch.addEventListener('input', onVarSearchInput);
     els.varSearch.addEventListener('keydown', (event) => {
