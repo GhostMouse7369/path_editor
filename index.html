@@ -891,7 +891,7 @@
     cursor: pointer;
     transition: border-color 0.14s ease, background-color 0.14s ease;
   }
-  .unknown-chip:hover { border-color: var(--warning); background: var(--surface); }
+  .unknown-chip:hover { border-color: var(--warning); background: var(--surface-muted); }
   .unknown-chip .icon { width: 10px; height: 10px; flex: 0 0 auto; }
   .unknown-chip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .path-actions { display: flex; align-items: center; gap: 0; opacity: 0.6; transition: opacity 0.14s ease; }
@@ -899,6 +899,122 @@
   .path-action { width: 27px; height: 27px; border-radius: 6px; }
   .path-action .icon { width: 14px; height: 14px; }
   .path-row.just-moved { animation: row-flash 0.55s ease-out; }
+
+  /* ---------- Path / variable groups ---------- */
+  .group-block { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .group-block--vars { gap: 2px; }
+  .var-list .group-block + .group-block { margin-top: 8px; }
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 5px 6px 5px 9px;
+    border-radius: 9px;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--panel-solid) 76%, transparent);
+  }
+  .group-block--paths > .group-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .group-dot {
+    --group-tone: var(--accent);
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--group-tone, var(--accent));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--group-tone, var(--accent)) 16%, transparent);
+  }
+  .group-name {
+    min-width: 0;
+    max-width: 44%;
+    padding: 1px 2px;
+    border: 0;
+    color: var(--text);
+    background: none;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    font-weight: 650;
+    line-height: 1.5;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  button.group-name:hover { color: var(--accent); }
+  .group-name--static { color: var(--text-secondary); font-weight: 600; cursor: default; }
+  .group-meta {
+    flex: 0 0 auto;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .group-chip {
+    flex: 0 0 auto;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft);
+    color: var(--text-tertiary);
+    background: var(--surface-subtle);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .group-chip--off { color: var(--warning); background: var(--warning-soft); border-color: var(--warning-border); }
+  .group-chip--warn { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-border); }
+  .group-actions {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-left: auto;
+    flex: 0 0 auto;
+    opacity: 0.55;
+    transition: opacity 0.14s ease;
+  }
+  .group-head:hover .group-actions,
+  .group-head:focus-within .group-actions { opacity: 1; }
+  .group-action {
+    width: 24px;
+    height: 24px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.14s ease, background-color 0.14s ease;
+  }
+  .group-action .icon { width: 13px; height: 13px; }
+  .group-action:hover { color: var(--text); background: var(--surface-muted); }
+  .group-action--danger:hover { color: var(--danger); background: var(--danger-soft); }
+  .group-block.is-off .group-head { border-style: dashed; }
+  .group-block.is-off .group-name { color: var(--text-tertiary); text-decoration: line-through; }
+  .path-row.is-off { opacity: 0.52; border-style: dashed; }
+  .path-row.is-off:hover { opacity: 0.8; }
+  .path-row.is-off:focus-within { opacity: 1; }
+  .panel-head-actions { display: flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+  .icon-btn--sm { width: 33px; height: 33px; border-radius: 9px; }
+  select.text-input { cursor: pointer; }
+  .field-inline { display: flex; align-items: center; gap: 8px; }
+  .field-inline > select { flex: 1 1 auto; min-width: 0; }
+  #groupDialog { width: min(470px, calc(100vw - 28px)); }
+
+  @media (max-width: 760px) {
+    .group-meta { display: none; }
+    .group-name { max-width: 52%; }
+    .group-block--paths > .group-head { position: static; }
+  }
 
   .empty-state {
     flex: 1 1 auto;
@@ -1553,6 +1669,8 @@
   <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h5"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 5.5A2.5 2.5 0 0 0 12.5 3H6a3 3 0 0 0-3 3v6.5A2.5 2.5 0 0 0 5.5 15"/></symbol>
   <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5V3.5A1.5 1.5 0 0 1 10.5 2h3A1.5 1.5 0 0 1 15 3.5v1M8.5 10h7M8.5 14h5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 8.5 4.5L12 12 3.5 7.5 12 3Z"/><path d="m4.5 12 7.5 4 7.5-4"/><path d="m4.5 16.5 7.5 4 7.5-4"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8.5"/><path d="M6.4 6.4a8 8 0 1 0 11.2 0"/></symbol>
 </svg>
 
 <div class="ambient" aria-hidden="true"></div>
@@ -1613,13 +1731,18 @@
               <h2 class="panel-title" id="varsTitle">变量管理</h2>
               <span class="badge" id="varBadge">0</span>
             </div>
-            <p class="panel-subtitle">维护变量名称与值，值中可以嵌套引用其他变量。</p>
+            <p class="panel-subtitle">按分组维护变量名称与值，值中可以嵌套引用其他变量。</p>
           </div>
         </div>
-        <button type="button" class="btn btn-secondary btn-sm" id="addVarBtn">
-          <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
-          <span>新增变量</span>
-        </button>
+        <div class="panel-head-actions">
+          <button type="button" class="icon-btn icon-btn--sm" id="addGroupBtn" title="新建分组" aria-label="新建分组">
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-layers"></use></svg>
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="addVarBtn">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+            <span>新增变量</span>
+          </button>
+        </div>
       </div>
       <div class="panel-toolbar">
         <div class="search-field">
@@ -1666,7 +1789,7 @@
       </div>
       <div class="path-tip">
         <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
-        <span>可直接输入 <code>%变量名%</code> 引用已有变量。拖动左侧把手或使用箭头调整顺序，筛选时排序会暂时锁定。</span>
+        <span>可直接输入 <code>%变量名%</code> 引用已有变量。拖动把手可在分组间移动条目；停用的分组不会进入复制与导出的 Path。</span>
       </div>
       <div class="panel-toolbar">
         <div class="search-field">
@@ -1740,6 +1863,20 @@
         </div>
         <div class="field">
           <div class="field-label-row">
+            <label class="field-label" for="varGroup">所属分组</label>
+            <span class="field-hint-inline">可选</span>
+          </div>
+          <div class="field-inline">
+            <select class="text-input" id="varGroup" aria-describedby="varGroupHint"></select>
+            <button type="button" class="btn btn-secondary btn-sm" id="varGroupNew">
+              <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg>
+              <span>新建</span>
+            </button>
+          </div>
+          <p class="field-hint" id="varGroupHint">同组变量会集中展示，可与组内 Path 一起启用或停用。</p>
+        </div>
+        <div class="field">
+          <div class="field-label-row">
             <label class="field-label" for="varValue">变量值</label>
             <span class="field-hint-inline">支持 %变量名% 引用</span>
           </div>
@@ -1782,9 +1919,10 @@
       </button>
     </header>
     <div class="modal-body">
-      <div class="import-summary">
+      <div class="import-summary import-summary--three">
         <div class="import-stat"><strong id="importVarCount">0</strong> 个变量</div>
         <div class="import-stat"><strong id="importPathCount">0</strong> 条路径</div>
+        <div class="import-stat"><strong id="importGroupCount">0</strong> 个分组</div>
       </div>
       <div class="import-preview" id="importPreview"></div>
       <div class="inline-note inline-note--warning" id="importWarning" hidden>
@@ -1833,6 +1971,13 @@
           </button>
           <span class="field-hint" id="pathTextHint">每行一条，也可以使用分号分隔。</span>
         </div>
+      </div>
+      <div class="field">
+        <div class="field-label-row">
+          <label class="field-label" for="pathTextGroup">追加到分组</label>
+          <span class="field-hint-inline">可稍后拖动调整</span>
+        </div>
+        <select class="text-input" id="pathTextGroup"></select>
       </div>
       <div class="import-summary import-summary--three">
         <div class="import-stat"><strong id="pathTextTotal">0</strong> 条识别</div>
@@ -1883,6 +2028,60 @@
   </div>
 </dialog>
 
+<dialog id="groupDialog" aria-labelledby="groupDialogTitle" aria-describedby="groupDialogSubtitle">
+  <div class="modal-card">
+    <header class="modal-header">
+      <div class="modal-icon" aria-hidden="true"><svg class="icon"><use href="#i-layers"></use></svg></div>
+      <div class="modal-heading">
+        <span class="modal-eyebrow" id="groupDialogEyebrow">NEW GROUP</span>
+        <h2 class="modal-title" id="groupDialogTitle">新建分组</h2>
+        <p class="modal-subtitle" id="groupDialogSubtitle">把同一工具的变量与 Path 条目归到一起，可整组启用或停用。</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="groupDialogClose" aria-label="关闭">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </header>
+    <form id="groupForm" novalidate>
+      <div class="modal-body">
+        <div class="field" id="groupNameField">
+          <div class="field-label-row">
+            <label class="field-label" for="groupName">分组名称</label>
+            <span class="field-required">必填 · 例如 NVM、Nodejs</span>
+          </div>
+          <input type="text" class="text-input" id="groupName" placeholder="例如 NVM" autocomplete="off" spellcheck="false" maxlength="40" aria-describedby="groupNameError">
+          <p class="field-error" id="groupNameError" hidden></p>
+        </div>
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label" for="groupCapability">能力标签</label>
+            <span class="field-hint-inline">可选</span>
+          </div>
+          <input type="text" class="text-input mono" id="groupCapability" placeholder="例如 node" autocomplete="off" spellcheck="false" maxlength="24" list="capabilityList">
+          <datalist id="capabilityList">
+            <option value="node"></option>
+            <option value="java"></option>
+            <option value="python"></option>
+            <option value="rust"></option>
+          </datalist>
+          <p class="field-hint">同一能力标签的分组互斥：启用一个分组时，其他同能力分组会被自动停用。</p>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <div class="footer-left">
+          <button type="button" class="btn btn-ghost btn-danger-ghost" id="groupDelete" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
+            删除分组
+          </button>
+        </div>
+        <div class="footer-actions">
+          <button type="button" class="btn btn-secondary" id="groupCancel">取消</button>
+          <button type="submit" class="btn btn-primary" id="groupSave">保存分组</button>
+        </div>
+      </footer>
+    </form>
+  </div>
+</dialog>
+
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription">
   <div class="modal-card modal-card--sm">
     <div class="confirm-body">
@@ -1908,8 +2107,9 @@
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'win-env-studio.state.v1';
+  const STORAGE_KEY = 'win-env-studio.state.v2';
   const THEME_KEY = 'win-env-studio.theme.v1';
+  const GROUP_TONES = ['#2f8ee5', '#0f9d8a', '#8b6cf0', '#d1731f', '#d6558a', '#4f8f3d'];
 
   const BUILTIN_VARS = [
     { name: 'SystemRoot', value: 'C:\\Windows' },
@@ -1942,21 +2142,24 @@
   ];
 
   const SAMPLE_STATE = {
+    groups: [
+      { id: 'g-nvm', name: 'NVM', enabled: true, capability: 'node' },
+      { id: 'g-node', name: 'Nodejs', enabled: false, capability: 'node' }
+    ],
     variables: [
-      { name: 'JAVA_HOME', value: 'C:\\Program Files\\Java\\jdk-21' },
-      { name: 'MAVEN_HOME', value: 'C:\\Program Files\\Apache\\maven-3.9.9' },
-      { name: 'NODE_HOME', value: 'C:\\Program Files\\nodejs' },
-      { name: 'NPM_CONFIG_PREFIX', value: '%APPDATA%\\npm-global' }
+      { name: 'NVM_HOME', value: 'C:\\Users\\ghostmouse\\AppData\\Local\\nvm', groupId: 'g-nvm' },
+      { name: 'NVM_SYMLINK', value: 'D:\\Developer\\nvm4w\\nodejs', groupId: 'g-nvm' },
+      { name: 'NODEJS_HOME', value: 'D:\\Developer\\Nodejs', groupId: 'g-node' }
     ],
     paths: [
-      '%JAVA_HOME%\\bin',
-      '%MAVEN_HOME%\\bin',
-      '%NODE_HOME%',
-      '%APPDATA%\\npm-global',
-      '%SystemRoot%\\System32',
-      '%SystemRoot%',
-      '%SystemRoot%\\System32\\Wbem',
-      '%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\'
+      { value: '%NVM_HOME%', groupId: 'g-nvm' },
+      { value: '%NVM_SYMLINK%', groupId: 'g-nvm' },
+      { value: '%NODEJS_HOME%', groupId: 'g-node' },
+      { value: '%NODEJS_HOME%\\node_modules\\prefix', groupId: 'g-node' },
+      { value: '%SystemRoot%\\System32', groupId: null },
+      { value: '%SystemRoot%', groupId: null },
+      { value: '%SystemRoot%\\System32\\Wbem', groupId: null },
+      { value: '%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\', groupId: null }
     ]
   };
 
@@ -1977,6 +2180,7 @@
     exportBtn: $('exportBtn'),
     addVarBtn: $('addVarBtn'),
     addPathBtn: $('addPathBtn'),
+    addGroupBtn: $('addGroupBtn'),
     varSearch: $('varSearch'),
     clearVarSearch: $('clearVarSearch'),
     varList: $('varList'),
@@ -1998,6 +2202,8 @@
     varName: $('varName'),
     varNameField: $('varNameField'),
     varNameError: $('varNameError'),
+    varGroup: $('varGroup'),
+    varGroupNew: $('varGroupNew'),
     varValue: $('varValue'),
     varRefPreview: $('varRefPreview'),
     renameNote: $('renameNote'),
@@ -2009,6 +2215,7 @@
     importFileMeta: $('importFileMeta'),
     importVarCount: $('importVarCount'),
     importPathCount: $('importPathCount'),
+    importGroupCount: $('importGroupCount'),
     importPreview: $('importPreview'),
     importWarning: $('importWarning'),
     importWarningText: $('importWarningText'),
@@ -2017,6 +2224,7 @@
     importDialogClose: $('importDialogClose'),
     pathTextDialog: $('pathTextDialog'),
     pathTextInput: $('pathTextInput'),
+    pathTextGroup: $('pathTextGroup'),
     pathTextHint: $('pathTextHint'),
     pathTextTotal: $('pathTextTotal'),
     pathTextNew: $('pathTextNew'),
@@ -2037,6 +2245,19 @@
     unknownList: $('unknownList'),
     unknownCancel: $('unknownCancel'),
     unknownDialogClose: $('unknownDialogClose'),
+    groupDialog: $('groupDialog'),
+    groupDialogEyebrow: $('groupDialogEyebrow'),
+    groupDialogTitle: $('groupDialogTitle'),
+    groupDialogSubtitle: $('groupDialogSubtitle'),
+    groupForm: $('groupForm'),
+    groupNameField: $('groupNameField'),
+    groupName: $('groupName'),
+    groupNameError: $('groupNameError'),
+    groupCapability: $('groupCapability'),
+    groupDelete: $('groupDelete'),
+    groupSave: $('groupSave'),
+    groupCancel: $('groupCancel'),
+    groupDialogClose: $('groupDialogClose'),
     suggestPopover: $('suggestPopover'),
     toastStack: $('toastStack'),
     fileInput: $('fileInput')
@@ -2045,6 +2266,7 @@
   let state = null;
   let restoredFromStorage = false;
   let editingName = null;
+  let editingGroupId = null;
   let pendingImport = null;
   let pendingPathText = null;
   let confirmResolver = null;
@@ -2141,32 +2363,184 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* Groups                                                              */
+  /* ------------------------------------------------------------------ */
+
+  function groupById(id) {
+    if (!id) return null;
+    return state.groups.find((item) => item.id === id) || null;
+  }
+
+  function groupTone(id) {
+    const index = state.groups.findIndex((item) => item.id === id);
+    return GROUP_TONES[(index < 0 ? 0 : index) % GROUP_TONES.length];
+  }
+
+  function isGroupEnabled(id) {
+    const group = groupById(id);
+    return group ? group.enabled : true;
+  }
+
+  function groupLabel(id) {
+    const group = groupById(id);
+    return group ? group.name : '未分组';
+  }
+
+  function enabledPaths() {
+    return state.paths.filter((item) => isGroupEnabled(item.groupId));
+  }
+
+  function capabilityConflict(group) {
+    if (!group || !group.enabled || !group.capability) return null;
+    const key = group.capability.toLowerCase();
+    return state.groups.find((item) => {
+      return item.id !== group.id && item.enabled && item.capability && item.capability.toLowerCase() === key;
+    }) || null;
+  }
+
+  /** Path 顺序即优先级，因此分组区块必须连续：先按分组顺序，未分组垫底。 */
+  function normalizePathOrder(target = state) {
+    const rank = (groupId) => {
+      const index = target.groups.findIndex((item) => item.id === groupId);
+      return index === -1 ? target.groups.length : index;
+    };
+    target.paths = target.paths
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => rank(a.item.groupId) - rank(b.item.groupId) || a.index - b.index)
+      .map((entry) => entry.item);
+  }
+
+  function newGroupId() {
+    return `g-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
+  }
+
+  function populateGroupSelect(select, selectedId) {
+    if (!select) return;
+    const options = ['<option value="">未分组</option>'];
+    state.groups.forEach((group) => {
+      options.push(`<option value="${escAttr(group.id)}">${esc(group.name)}${group.enabled ? '' : '（已停用）'}</option>`);
+    });
+    select.innerHTML = options.join('');
+    select.value = selectedId && groupById(selectedId) ? selectedId : '';
+  }
+
+  const CAPABILITY_PRESETS = ['node', 'java', 'python', 'rust', 'go', 'docker'];
+
+  function refreshCapabilityOptions() {
+    const list = els.groupCapability.list;
+    if (!list) return;
+    const names = CAPABILITY_PRESETS.concat(state.groups.map((item) => item.capability).filter(Boolean));
+    const seen = new Set();
+    const options = [];
+    names.forEach((name) => {
+      const key = name.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      options.push(`<option value="${escAttr(name)}"></option>`);
+    });
+    list.innerHTML = options.join('');
+  }
+
+  function groupChipsHtml(group) {
+    const chips = [];
+    if (group.capability) chips.push(`<span class="group-chip">${esc(group.capability)}</span>`);
+    if (!group.enabled) chips.push('<span class="group-chip group-chip--off">已停用</span>');
+    const conflict = capabilityConflict(group);
+    if (conflict) {
+      chips.push(`<span class="group-chip group-chip--warn" title="与「${escAttr(conflict.name)}」同时启用，Path 中靠前的分组优先">能力冲突</span>`);
+    }
+    return chips.join('');
+  }
+
+  function groupHeadHtml(group, metaText, addLabel) {
+    return `<div class="group-head" data-group="${escAttr(group.id)}">
+      <span class="group-dot" style="--group-tone:${escAttr(groupTone(group.id))}" aria-hidden="true"></span>
+      <button type="button" class="group-name" data-action="edit-group" data-group="${escAttr(group.id)}" title="编辑分组「${escAttr(group.name)}」">${esc(group.name)}</button>
+      <span class="group-meta">${esc(metaText)}</span>
+      ${groupChipsHtml(group)}
+      <div class="group-actions">
+        <button type="button" class="group-action" data-action="add-to-group" data-group="${escAttr(group.id)}" title="${escAttr(addLabel)}" aria-label="${escAttr(addLabel)}">${iconMarkup('i-plus')}</button>
+        <button type="button" class="group-action" data-action="toggle-group" data-group="${escAttr(group.id)}" title="${group.enabled ? '停用分组（Path 不参与复制与导出）' : '启用分组'}" aria-label="${group.enabled ? '停用分组' : '启用分组'}">${iconMarkup('i-power')}</button>
+        <button type="button" class="group-action" data-action="edit-group" data-group="${escAttr(group.id)}" title="编辑分组" aria-label="编辑分组「${escAttr(group.name)}」">${iconMarkup('i-edit')}</button>
+        <button type="button" class="group-action group-action--danger" data-action="delete-group" data-group="${escAttr(group.id)}" title="删除分组" aria-label="删除分组「${escAttr(group.name)}」">${iconMarkup('i-trash')}</button>
+      </div>
+    </div>`;
+  }
+
+  function looseGroupHeadHtml(metaText) {
+    return `<div class="group-head group-head--loose">
+      <span class="group-dot" style="--group-tone:var(--text-tertiary)" aria-hidden="true"></span>
+      <span class="group-name group-name--static">未分组</span>
+      <span class="group-meta">${esc(metaText)}</span>
+    </div>`;
+  }
+
+  /* ------------------------------------------------------------------ */
   /* State and persistence                                               */
   /* ------------------------------------------------------------------ */
+
+  function sanitizeState(raw) {
+    const groups = [];
+    (Array.isArray(raw.groups) ? raw.groups : []).forEach((item) => {
+      if (!item || typeof item !== 'object') return;
+      const name = String(item.name ?? '').trim();
+      if (!name) return;
+      const duplicate = groups.some((group) => sameName(group.name, name));
+      if (duplicate) return;
+      let id = String(item.id ?? '').trim();
+      if (!id || groups.some((group) => group.id === id)) id = newGroupId();
+      groups.push({ id, name, enabled: item.enabled !== false, capability: String(item.capability ?? '').trim() });
+    });
+
+    const resolveGroup = (value) => {
+      if (value == null || value === '') return null;
+      const key = String(value);
+      const byId = groups.find((group) => group.id === key);
+      if (byId) return byId.id;
+      const byName = groups.find((group) => sameName(group.name, key));
+      return byName ? byName.id : null;
+    };
+
+    const seen = new Set();
+    const variables = [];
+    (Array.isArray(raw.variables) ? raw.variables : []).forEach((item) => {
+      if (!item || typeof item !== 'object') return;
+      const name = String(item.name ?? '').trim();
+      if (!name || seen.has(name.toLowerCase())) return;
+      seen.add(name.toLowerCase());
+      variables.push({
+        name,
+        value: item.value == null ? '' : String(item.value),
+        groupId: resolveGroup(item.group ?? item.groupId)
+      });
+    });
+
+    const paths = [];
+    (Array.isArray(raw.paths) ? raw.paths : []).forEach((item) => {
+      if (item == null) return;
+      if (typeof item === 'string') {
+        if (item.trim()) paths.push({ value: item, groupId: null });
+        return;
+      }
+      if (typeof item !== 'object') return;
+      const value = String(item.value ?? '');
+      if (!value.trim()) return;
+      paths.push({ value, groupId: resolveGroup(item.group ?? item.groupId) });
+    });
+
+    return { groups, variables, paths };
+  }
 
   function loadInitialState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return clone(SAMPLE_STATE);
       const parsed = JSON.parse(raw);
-      if (!parsed || !Array.isArray(parsed.variables) || !Array.isArray(parsed.paths)) {
-        return clone(SAMPLE_STATE);
-      }
-      const seen = new Set();
-      const variables = [];
-      parsed.variables.forEach((item) => {
-        if (!item || typeof item !== 'object') return;
-        const name = String(item.name ?? '').trim();
-        if (!name || seen.has(name.toLowerCase())) return;
-        const value = item.value == null ? '' : String(item.value);
-        seen.add(name.toLowerCase());
-        variables.push({ name, value });
-      });
+      if (!parsed || typeof parsed !== 'object') return clone(SAMPLE_STATE);
       restoredFromStorage = true;
-      return {
-        variables,
-        paths: parsed.paths.filter((item) => typeof item === 'string')
-      };
+      const next = sanitizeState(parsed);
+      normalizePathOrder(next);
+      return next;
     } catch (error) {
       console.warn('读取本地草稿失败，使用示例数据。', error);
       return clone(SAMPLE_STATE);
@@ -2193,8 +2567,9 @@
     }
     try {
       const payload = {
-        version: 1,
+        version: 2,
         updatedAt: new Date().toISOString(),
+        groups: state.groups,
         variables: state.variables,
         paths: state.paths
       };
@@ -2271,7 +2646,7 @@
     const known = getKnownNames();
     const unknown = new Map();
     const regex = /%([^%]+)%/g;
-    const texts = state.variables.map((item) => item.value).concat(state.paths);
+    const texts = state.variables.map((item) => item.value).concat(state.paths.map((item) => item.value));
     texts.forEach((text) => {
       let match;
       regex.lastIndex = 0;
@@ -2339,17 +2714,26 @@
   function renderVariables() {
     const query = els.varSearch.value.trim();
     const lower = query.toLowerCase();
-    const items = state.variables
-      .map((item, index) => ({ ...item, index }))
-      .filter((item) => !lower || item.name.toLowerCase().includes(lower) || item.value.toLowerCase().includes(lower))
-      .sort((a, b) => VAR_NAME_COLLATOR.compare(a.name, b.name) || a.index - b.index);
+    const matches = (item) => !lower || item.name.toLowerCase().includes(lower) || item.value.toLowerCase().includes(lower);
 
+    const bands = state.groups.map((group) => ({ group, items: [] }));
+    const loose = { group: null, items: [] };
+    state.variables.forEach((item, index) => {
+      if (!matches(item)) return;
+      const band = bands.find((entry) => entry.group.id === item.groupId) || loose;
+      band.items.push({ ...item, index });
+    });
+    const sorter = (a, b) => VAR_NAME_COLLATOR.compare(a.name, b.name) || a.index - b.index;
+    bands.forEach((band) => band.items.sort(sorter));
+    loose.items.sort(sorter);
+
+    const shown = bands.reduce((sum, band) => sum + band.items.length, 0) + loose.items.length;
     els.varBadge.textContent = String(state.variables.length);
     els.varCountText.textContent = query
-      ? `显示 ${items.length} / 共 ${state.variables.length} 个`
-      : `共 ${state.variables.length} 个变量`;
+      ? `显示 ${shown} / 共 ${state.variables.length} 个`
+      : `共 ${state.variables.length} 个变量${state.groups.length ? ` · ${state.groups.length} 组` : ''}`;
 
-    if (!items.length) {
+    if (!shown) {
       if (!state.variables.length) {
         els.varList.innerHTML = emptyStateHtml(
           'i-percent',
@@ -2369,26 +2753,38 @@
       return;
     }
 
-    els.varList.innerHTML = items.map((item) => {
-      const valueEmpty = item.value.trim() === '';
-      const unknown = unknownRefNames(item.value);
-      const warningTitle = unknown.length ? `未定义变量：${unknown.join('、')}；点击新建` : '';
-      const warning = unknown.length
-        ? `<button type="button" class="ref-warning" data-action="create-unknown-vars" title="${escAttr(warningTitle)}" aria-label="${escAttr(warningTitle)}">!</button>`
-        : '';
-      return `<div class="var-row" role="listitem" data-index="${item.index}">
-        <div class="var-ident">
-          <span class="var-dot" aria-hidden="true"></span>
-          <button type="button" class="var-name" data-action="edit" title="编辑 ${escAttr(item.name)}">${highlightText(item.name, query)}</button>
-          ${warning}
-        </div>
-        <button type="button" class="var-value${valueEmpty ? ' is-empty' : ''}" data-action="edit" title="${escAttr(item.value || '（空值）')}">${valueEmpty ? '（空值）' : renderValueHTML(item.value, query)}</button>
-        <div class="var-actions">
-          <button type="button" class="row-action" data-action="edit" title="编辑 ${escAttr(item.name)}" aria-label="编辑 ${escAttr(item.name)}">${iconMarkup('i-edit')}</button>
-          <button type="button" class="row-action row-action--danger" data-action="delete" title="删除 ${escAttr(item.name)}" aria-label="删除 ${escAttr(item.name)}">${iconMarkup('i-trash')}</button>
-        </div>
-      </div>`;
+    const visibleBands = bands.filter((band) => band.items.length || !query);
+    if (loose.items.length || (!state.groups.length && !query)) visibleBands.push(loose);
+
+    els.varList.innerHTML = visibleBands.map((band) => {
+      const isOff = band.group ? !band.group.enabled : false;
+      const head = band.group
+        ? groupHeadHtml(band.group, `${band.items.length} 个`, '在此分组新增变量')
+        : (state.groups.length ? looseGroupHeadHtml(`${band.items.length} 个`) : '');
+      const rows = band.items.map((item) => renderVarRow(item, query)).join('');
+      return `<section class="group-block group-block--vars${isOff ? ' is-off' : ''}" data-group="${band.group ? escAttr(band.group.id) : ''}">${head}${rows}</section>`;
     }).join('');
+  }
+
+  function renderVarRow(item, query) {
+    const valueEmpty = item.value.trim() === '';
+    const unknown = unknownRefNames(item.value);
+    const warningTitle = unknown.length ? `未定义变量：${unknown.join('、')}；点击新建` : '';
+    const warning = unknown.length
+      ? `<button type="button" class="ref-warning" data-action="create-unknown-vars" title="${escAttr(warningTitle)}" aria-label="${escAttr(warningTitle)}">!</button>`
+      : '';
+    return `<div class="var-row" role="listitem" data-index="${item.index}">
+      <div class="var-ident">
+        <span class="var-dot" aria-hidden="true"></span>
+        <button type="button" class="var-name" data-action="edit" title="编辑 ${escAttr(item.name)}">${highlightText(item.name, query)}</button>
+        ${warning}
+      </div>
+      <button type="button" class="var-value${valueEmpty ? ' is-empty' : ''}" data-action="edit" title="${escAttr(item.value || '（空值）')}">${valueEmpty ? '（空值）' : renderValueHTML(item.value, query)}</button>
+      <div class="var-actions">
+        <button type="button" class="row-action" data-action="edit" title="编辑 ${escAttr(item.name)}" aria-label="编辑 ${escAttr(item.name)}">${iconMarkup('i-edit')}</button>
+        <button type="button" class="row-action row-action--danger" data-action="delete" title="删除 ${escAttr(item.name)}" aria-label="删除 ${escAttr(item.name)}">${iconMarkup('i-trash')}</button>
+      </div>
+    </div>`;
   }
 
   function normalizePathValue(value) {
@@ -2400,7 +2796,7 @@
     const normalized = normalizePathValue(value);
     if (normalized) {
       const duplicateIndex = state.paths.findIndex((item, itemIndex) => {
-        return itemIndex !== index && normalizePathValue(item) === normalized;
+        return itemIndex !== index && normalizePathValue(item.value) === normalized;
       });
       if (duplicateIndex !== -1) warnings.push(`与第 ${duplicateIndex + 1} 条路径重复`);
     }
@@ -2412,19 +2808,25 @@
   function renderPaths() {
     const query = els.pathSearch.value.trim();
     const lower = query.toLowerCase();
-    const filtered = state.paths
-      .map((value, index) => ({ value, index }))
-      .filter((item) => !lower || item.value.toLowerCase().includes(lower));
     const filteredMode = Boolean(query);
 
+    const bands = state.groups.map((group) => ({ group, items: [] }));
+    const loose = { group: null, items: [] };
+    state.paths.forEach((item, index) => {
+      if (lower && !item.value.toLowerCase().includes(lower)) return;
+      const band = bands.find((entry) => entry.group.id === item.groupId) || loose;
+      band.items.push({ value: item.value, groupId: item.groupId, index });
+    });
+
+    const shown = bands.reduce((sum, band) => sum + band.items.length, 0) + loose.items.length;
     els.pathBadge.textContent = String(state.paths.length);
     els.pathCountText.textContent = query
-      ? `显示 ${filtered.length} / 共 ${state.paths.length} 条`
-      : `共 ${state.paths.length} 条`;
+      ? `显示 ${shown} / 共 ${state.paths.length} 条`
+      : `共 ${state.paths.length} 条 · 启用 ${enabledPaths().length} 条`;
     els.pathFilterLock.hidden = !filteredMode;
     els.pathList.classList.toggle('is-filtered', filteredMode);
 
-    if (!filtered.length) {
+    if (!shown) {
       if (!state.paths.length) {
         els.pathList.innerHTML = emptyStateHtml(
           'i-route',
@@ -2443,16 +2845,39 @@
       return;
     }
 
-    els.pathList.innerHTML = filtered.map((item) => {
-      const warnings = getPathWarnings(item.value, item.index);
-      const unknown = unknownRefNames(item.value);
-      const warningTitle = unknown.length
-        ? `未定义变量：${unknown.join('、')}；点击新建`
-        : warnings.join('；');
-      const isFirst = item.index === 0;
-      const isLast = item.index === state.paths.length - 1;
-      return `<div class="path-row" role="listitem" data-index="${item.index}" draggable="false">
-        <button type="button" class="drag-handle" title="${filteredMode ? '筛选时不可拖动排序' : '拖动调整顺序'}" aria-label="拖动第 ${item.index + 1} 条路径排序" ${filteredMode ? 'disabled' : ''}>${iconMarkup('i-grip')}</button>
+    const visibleBands = bands.filter((band) => band.items.length || !query);
+    if (loose.items.length) visibleBands.push(loose);
+
+    els.pathList.innerHTML = visibleBands.map((band) => {
+      const isOff = band.group ? !band.group.enabled : false;
+      const first = band.items[0];
+      const last = band.items[band.items.length - 1];
+      const meta = band.items.length
+        ? `${band.items.length} 条 · #${first.index + 1}–#${last.index + 1}`
+        : '0 条';
+      const head = band.group
+        ? groupHeadHtml(band.group, meta, '在此分组添加路径')
+        : (state.groups.length ? looseGroupHeadHtml(meta) : '');
+      const rows = band.items.map((item, position) => renderPathRow(item, {
+        query,
+        filteredMode,
+        isOff,
+        isFirst: position === 0,
+        isLast: position === band.items.length - 1
+      })).join('');
+      return `<section class="group-block group-block--paths${isOff ? ' is-off' : ''}" data-group="${band.group ? escAttr(band.group.id) : ''}">${head}${rows}</section>`;
+    }).join('');
+  }
+
+  function renderPathRow(item, options) {
+    const warnings = getPathWarnings(item.value, item.index);
+    const unknown = unknownRefNames(item.value);
+    const warningTitle = unknown.length
+      ? `未定义变量：${unknown.join('、')}；点击新建`
+      : warnings.join('；');
+    const { query, filteredMode, isOff, isFirst, isLast } = options;
+    return `<div class="path-row${isOff ? ' is-off' : ''}" role="listitem" data-index="${item.index}" data-group="${item.groupId ? escAttr(item.groupId) : ''}" draggable="false">
+        <button type="button" class="drag-handle" title="${filteredMode ? '筛选时不可拖动排序' : '拖动调整顺序或移动到其他分组'}" aria-label="拖动第 ${item.index + 1} 条路径排序" ${filteredMode ? 'disabled' : ''}>${iconMarkup('i-grip')}</button>
         <span class="path-index" aria-hidden="true">${String(item.index + 1).padStart(2, '0')}</span>
         <div class="path-field">
           <div class="path-input-wrap">
@@ -2462,17 +2887,17 @@
           <div class="path-unknowns" ${unknown.length ? '' : 'hidden'}>${pathUnknownsInnerHtml(unknown)}</div>
         </div>
         <div class="path-actions">
-          <button type="button" class="path-action" data-action="up" title="${filteredMode ? '筛选时不可排序' : '上移'}" ${filteredMode || isFirst ? 'disabled' : ''} aria-label="上移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-up')}</button>
-          <button type="button" class="path-action" data-action="down" title="${filteredMode ? '筛选时不可排序' : '下移'}" ${filteredMode || isLast ? 'disabled' : ''} aria-label="下移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-down')}</button>
+          <button type="button" class="path-action" data-action="up" title="${filteredMode ? '筛选时不可排序' : '组内上移'}" ${filteredMode || isFirst ? 'disabled' : ''} aria-label="上移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-up')}</button>
+          <button type="button" class="path-action" data-action="down" title="${filteredMode ? '筛选时不可排序' : '组内下移'}" ${filteredMode || isLast ? 'disabled' : ''} aria-label="下移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-down')}</button>
           <button type="button" class="path-action path-action--danger" data-action="delete" title="删除这条路径" aria-label="删除第 ${item.index + 1} 条路径">${iconMarkup('i-trash')}</button>
         </div>
       </div>`;
-    }).join('');
   }
 
   function renderStats() {
     els.statVars.textContent = String(state.variables.length);
     els.statPaths.textContent = String(state.paths.length);
+    els.statPaths.title = `${enabledPaths().length} 条已启用，会进入复制的 Path`;
     const unknown = collectUnknownRefs();
     if (unknown.size) {
       const names = Array.from(unknown.values());
@@ -2594,23 +3019,27 @@
     });
   }
 
-  function openVarDialog(index, presetName = '') {
+  function openVarDialog(index, presetName = '', presetGroupId = null) {
     const item = typeof index === 'number' ? state.variables[index] : null;
     editingName = item ? item.name : null;
     const isEdit = Boolean(item);
     const preset = isEdit ? '' : String(presetName || '').trim();
+    const presetGroup = isEdit ? null : (groupById(presetGroupId) ? presetGroupId : null);
 
     els.varDialogEyebrow.textContent = isEdit ? 'EDIT VARIABLE' : 'NEW VARIABLE';
     els.varDialogTitle.textContent = isEdit ? '编辑变量' : '新增变量';
     els.varDialogSubtitle.textContent = isEdit
-      ? '修改名称或值。如果重命名，其他值和 Path 中的引用会自动同步。'
+      ? '修改名称、值或所属分组。如果重命名，其他值和 Path 中的引用会自动同步。'
       : preset
         ? `正在创建被引用但尚未定义的变量「${preset}」，名称已自动填入。`
-        : '添加一个可在 Path 中通过 %变量名% 引用的变量。';
+        : presetGroup
+          ? `正在为分组「${groupLabel(presetGroup)}」添加变量，保存后会归入该分组。`
+          : '添加一个可在 Path 中通过 %变量名% 引用的变量。';
     els.varSave.textContent = isEdit ? '保存更改' : '保存变量';
     els.varDelete.hidden = !isEdit;
     els.varName.value = item ? item.name : preset;
     els.varValue.value = item ? item.value : '';
+    populateGroupSelect(els.varGroup, item ? item.groupId : presetGroup);
     els.renameNote.hidden = true;
     setVarNameError('');
     refreshVarRefPreview();
@@ -2684,7 +3113,9 @@
     state.variables.forEach((item) => {
       item.value = item.value.replace(regex, replacement);
     });
-    state.paths = state.paths.map((item) => item.replace(regex, replacement));
+    state.paths.forEach((item) => {
+      item.value = item.value.replace(regex, replacement);
+    });
   }
 
   function submitVariable(event) {
@@ -2697,6 +3128,7 @@
       return;
     }
     const value = els.varValue.value;
+    const groupId = groupById(els.varGroup.value) ? els.varGroup.value : null;
     const isEdit = Boolean(editingName);
     if (isEdit) {
       const index = state.variables.findIndex((item) => sameName(item.name, editingName));
@@ -2706,9 +3138,9 @@
         return;
       }
       if (!sameName(name, editingName)) rewriteReferences(editingName, name);
-      state.variables[index] = { name, value };
+      state.variables[index] = { name, value, groupId };
     } else {
-      state.variables.push({ name, value });
+      state.variables.push({ name, value, groupId });
     }
     els.varDialog.close();
     renderAll();
@@ -2719,9 +3151,14 @@
   async function deleteVariableAt(index) {
     const item = state.variables[index];
     if (!item) return;
+    const scope = new Set();
+    state.paths.forEach((entry) => {
+      if (extractRefs(entry.value).some((ref) => sameName(ref.name, item.name))) scope.add(groupLabel(entry.groupId));
+    });
+    const scopeText = scope.size ? `Path 中「${Array.from(scope).join('、')}」仍有条目引用它，删除后这些引用会变成未知引用。` : '';
     const confirmed = await askConfirm({
       title: `删除变量「${item.name}」？`,
-      description: 'Path 和其他变量中对该变量的引用会被保留，但会变成未知引用，需要手动处理。',
+      description: `${item.groupId ? `该变量属于分组「${groupLabel(item.groupId)}」。` : ''}${scopeText}引用不会被自动清除，需要手动处理。`,
       okLabel: '删除变量'
     });
     if (!confirmed) return;
@@ -2745,15 +3182,17 @@
   /* Path operations                                                     */
   /* ------------------------------------------------------------------ */
 
-  function addPath() {
+  function addPath(groupId = null) {
     if (els.pathSearch.value.trim()) {
       els.pathSearch.value = '';
       syncSearchClearButtons();
     }
-    state.paths.push('');
+    const entry = { value: '', groupId: groupById(groupId) ? groupId : null };
+    state.paths.push(entry);
+    normalizePathOrder();
     renderAll();
     scheduleSave();
-    focusPathInput(state.paths.length - 1);
+    focusPathInput(state.paths.indexOf(entry));
   }
 
   function focusPathInput(index) {
@@ -2776,7 +3215,7 @@
   }
 
   function computePathTextImport(text) {
-    const existing = new Set(state.paths.map(normalizePathValue).filter(Boolean));
+    const existing = new Set(state.paths.map((item) => normalizePathValue(item.value)).filter(Boolean));
     const seen = new Set();
     const entries = [];
     const duplicates = [];
@@ -2835,9 +3274,10 @@
     els.pathTextConfirm.textContent = result.entries.length ? `追加 ${result.entries.length} 条` : '没有可追加项';
   }
 
-  function openPathTextDialog() {
+  function openPathTextDialog(groupId = null) {
     pendingPathText = null;
     els.pathTextInput.value = '';
+    populateGroupSelect(els.pathTextGroup, groupById(groupId) ? groupId : null);
     setPathTextHint('每行一条，也可以使用分号分隔。');
     updatePathTextPreview();
     els.pathTextDialog.showModal();
@@ -2874,17 +3314,19 @@
     const snapshot = clone(state);
     const importedCount = result.entries.length;
     const duplicateCount = result.duplicates.length;
+    const groupId = groupById(els.pathTextGroup.value) ? els.pathTextGroup.value : null;
     if (els.pathSearch.value.trim()) {
       els.pathSearch.value = '';
       syncSearchClearButtons();
     }
-    state.paths.push(...result.entries);
+    state.paths.push(...result.entries.map((value) => ({ value, groupId })));
+    normalizePathOrder();
     pendingPathText = null;
     els.pathTextDialog.close();
     renderAll();
     persistNow();
     showToast(
-      `已追加 ${importedCount} 条路径${duplicateCount ? `，跳过 ${duplicateCount} 条重复项` : ''}`,
+      `已追加 ${importedCount} 条路径到${groupLabel(groupId)}${duplicateCount ? `，跳过 ${duplicateCount} 条重复项` : ''}`,
       {
         type: 'success',
         actionLabel: '撤销',
@@ -2925,9 +3367,11 @@
   }
 
   async function copyAllPaths() {
-    const paths = state.paths.map((item) => item.trim()).filter(Boolean);
+    const enabled = enabledPaths();
+    const paths = enabled.map((item) => item.value.trim()).filter(Boolean);
+    const skipped = state.paths.length - enabled.length;
     if (!paths.length) {
-      showToast('Path 为空，没有可复制的内容。', { type: 'info' });
+      showToast('没有可复制的路径（可能全部位于停用的分组）。', { type: 'info' });
       return;
     }
     const copied = await writeClipboardText(paths.join(';'));
@@ -2935,13 +3379,17 @@
       showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
       return;
     }
-    showToast(`已复制 ${paths.length} 条路径（分号分隔，可直接粘贴到 Windows Path）`, { type: 'success' });
+    showToast(
+      `已复制 ${paths.length} 条路径${skipped ? `，跳过 ${skipped} 条停用分组条目` : ''}（分号分隔，可直接粘贴到 Windows Path）`,
+      { type: 'success' }
+    );
   }
 
   function movePath(index, delta) {
     const target = index + delta;
     if (target < 0 || target >= state.paths.length) return;
     if (els.pathSearch.value.trim()) return;
+    if (state.paths[index].groupId !== state.paths[target].groupId) return;
     const [item] = state.paths.splice(index, 1);
     state.paths.splice(target, 0, item);
     renderAll();
@@ -2974,15 +3422,21 @@
 
   function reorderPath(fromIndex, toIndex, insertBefore) {
     if (fromIndex === toIndex) return;
+    const moved = state.paths[fromIndex];
+    const anchor = state.paths[toIndex];
+    if (!moved || !anchor) return;
+    moved.groupId = anchor.groupId;
+    state.paths.splice(fromIndex, 1);
     let insertIndex = toIndex + (insertBefore ? 0 : 1);
-    const [item] = state.paths.splice(fromIndex, 1);
     if (fromIndex < insertIndex) insertIndex -= 1;
     insertIndex = Math.max(0, Math.min(insertIndex, state.paths.length));
-    state.paths.splice(insertIndex, 0, item);
+    state.paths.splice(insertIndex, 0, moved);
+    normalizePathOrder();
     renderAll();
     persistNow();
+    const finalIndex = state.paths.indexOf(moved);
     requestAnimationFrame(() => {
-      const row = els.pathList.querySelector(`.path-row[data-index="${insertIndex}"]`);
+      const row = els.pathList.querySelector(`.path-row[data-index="${finalIndex}"]`);
       if (row) row.classList.add('just-moved');
     });
   }
@@ -2995,6 +3449,161 @@
     dragIndex = null;
     dragArmed = false;
     dropTarget = null;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Group operations                                                    */
+  /* ------------------------------------------------------------------ */
+
+  function setGroupNameError(message) {
+    const hasError = Boolean(message);
+    els.groupNameField.classList.toggle('has-error', hasError);
+    els.groupNameError.hidden = !hasError;
+    els.groupNameError.innerHTML = hasError ? `${iconMarkup('i-alert')}<span>${esc(message)}</span>` : '';
+    els.groupName.setAttribute('aria-invalid', hasError ? 'true' : 'false');
+  }
+
+  function validateGroupName(name) {
+    if (!name) return '请输入分组名称。';
+    if (name.length > 40) return '分组名称不能超过 40 个字符。';
+    if (/[\u0000-\u001f]/.test(name)) return '分组名称不能包含控制字符。';
+    const duplicate = state.groups.find((item) => item.id !== editingGroupId && sameName(item.name, name));
+    if (duplicate) return `分组「${duplicate.name}」已经存在，请换一个名称。`;
+    return '';
+  }
+
+  function openGroupDialog(groupId = null, presetName = '') {
+    const group = groupById(groupId);
+    editingGroupId = group ? group.id : null;
+    const isEdit = Boolean(group);
+    const counts = isEdit
+      ? `${state.variables.filter((item) => item.groupId === group.id).length} 个变量 · ${state.paths.filter((item) => item.groupId === group.id).length} 条路径`
+      : '';
+
+    els.groupDialogEyebrow.textContent = isEdit ? 'EDIT GROUP' : 'NEW GROUP';
+    els.groupDialogTitle.textContent = isEdit ? '编辑分组' : '新建分组';
+    els.groupDialogSubtitle.textContent = isEdit
+      ? `「${group.name}」当前包含 ${counts}，可在这里改名或调整能力标签。`
+      : '把同一工具的变量与 Path 条目归到一起，可整组启用或停用。';
+    els.groupSave.textContent = isEdit ? '保存分组' : '创建分组';
+    els.groupDelete.hidden = !isEdit;
+    els.groupName.value = group ? group.name : presetName;
+    els.groupCapability.value = group ? group.capability : '';
+    refreshCapabilityOptions();
+    setGroupNameError('');
+    els.groupDialog.showModal();
+    updateDialogClass();
+    requestAnimationFrame(() => {
+      els.groupName.focus();
+      if (isEdit) els.groupName.select();
+    });
+  }
+
+  function submitGroup(event) {
+    event.preventDefault();
+    const name = els.groupName.value.trim();
+    const error = validateGroupName(name);
+    if (error) {
+      setGroupNameError(error);
+      els.groupName.focus();
+      return;
+    }
+    const capability = els.groupCapability.value.trim();
+    const targetId = editingGroupId;
+    let createdId = null;
+    let message;
+
+    if (targetId) {
+      const group = groupById(targetId);
+      if (!group) {
+        els.groupDialog.close();
+        showToast('这个分组已经不存在了，请刷新后重试。', { type: 'error' });
+        return;
+      }
+      group.name = name;
+      group.capability = capability;
+      message = `分组已更新为「${name}」`;
+    } else {
+      const group = { id: newGroupId(), name, enabled: true, capability };
+      state.groups.push(group);
+      createdId = group.id;
+      message = `已创建分组「${name}」`;
+    }
+
+    els.groupDialog.close();
+    if (els.varDialog.open) populateGroupSelect(els.varGroup, createdId || els.varGroup.value);
+    if (els.pathTextDialog.open) populateGroupSelect(els.pathTextGroup, createdId || els.pathTextGroup.value);
+    renderAll();
+    persistNow();
+    showToast(message, { type: 'success' });
+  }
+
+  function toggleGroup(id) {
+    const group = groupById(id);
+    if (!group) return;
+    const snapshot = clone(state);
+    const next = !group.enabled;
+    group.enabled = next;
+
+    const autoDisabled = [];
+    if (next && group.capability) {
+      const key = group.capability.toLowerCase();
+      state.groups.forEach((item) => {
+        if (item.id === group.id || !item.enabled) return;
+        if (item.capability && item.capability.toLowerCase() === key) {
+          item.enabled = false;
+          autoDisabled.push(item.name);
+        }
+      });
+    }
+
+    renderAll();
+    persistNow();
+    const suffix = autoDisabled.length ? `，已自动停用同能力分组：${autoDisabled.join('、')}` : '';
+    showToast(`${next ? '已启用' : '已停用'}分组「${group.name}」${suffix}`, {
+      type: next ? 'success' : 'warning',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复分组状态', { type: 'success' });
+      }
+    });
+  }
+
+  async function deleteGroup(id) {
+    const group = groupById(id);
+    if (!group) return;
+    const varCount = state.variables.filter((item) => item.groupId === id).length;
+    const pathCount = state.paths.filter((item) => item.groupId === id).length;
+    const confirmed = await askConfirm({
+      title: `删除分组「${group.name}」？`,
+      description: `分组内的 ${varCount} 个变量和 ${pathCount} 条路径会变为未分组，数据本身不会被删除。`,
+      okLabel: '删除分组'
+    });
+    if (!confirmed) return;
+    const snapshot = clone(state);
+    state.variables.forEach((item) => {
+      if (item.groupId === id) item.groupId = null;
+    });
+    state.paths.forEach((item) => {
+      if (item.groupId === id) item.groupId = null;
+    });
+    state.groups = state.groups.filter((item) => item.id !== id);
+    normalizePathOrder();
+    renderAll();
+    persistNow();
+    showToast(`已删除分组「${group.name}」，条目已移到未分组`, {
+      type: 'warning',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复分组', { type: 'success' });
+      }
+    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -3292,14 +3901,20 @@
   function parseImportData(raw) {
     let variableSource;
     let pathSource;
+    let groupSource;
     let formatLabel = '';
 
     if (Array.isArray(raw)) {
       variableSource = raw;
       pathSource = [];
+      groupSource = [];
     } else if (raw && typeof raw === 'object') {
       variableSource = raw.variables ?? raw.Variables ?? [];
-      pathSource = raw.path ?? raw.paths ?? raw.Path ?? raw.PATH ?? [];
+      groupSource = raw.groups ?? raw.Groups ?? [];
+      pathSource = raw.items ?? raw.path ?? raw.paths ?? raw.Path ?? raw.PATH ?? [];
+      if (Array.isArray(raw.disabledPath)) {
+        pathSource = (Array.isArray(pathSource) ? pathSource : []).concat(raw.disabledPath);
+      }
       if (typeof raw.format === 'string') formatLabel = raw.format;
     } else {
       throw new Error('JSON 顶层必须是对象或数组。');
@@ -3315,6 +3930,40 @@
     if (!Array.isArray(pathSource)) throw new Error('path 字段必须是数组或分号分隔的字符串。');
 
     const issues = [];
+    const groups = [];
+    const groupIndex = new Map();
+
+    const ensureGroup = (rawName, rawId, enabled, capability) => {
+      const name = String(rawName ?? '').trim();
+      if (!name) return null;
+      const key = name.toLowerCase();
+      if (groupIndex.has(key)) return groupIndex.get(key);
+      let id = String(rawId ?? '').trim();
+      if (!id || groups.some((group) => group.id === id)) id = `g-import-${groups.length + 1}`;
+      groups.push({ id, name, enabled: enabled !== false, capability: String(capability ?? '').trim() });
+      groupIndex.set(key, id);
+      return id;
+    };
+
+    (Array.isArray(groupSource) ? groupSource : []).forEach((item) => {
+      if (!item || typeof item !== 'object') {
+        issues.push('已忽略无效的分组条目');
+        return;
+      }
+      ensureGroup(item.name ?? item.Name, item.id ?? item.groupId, item.enabled, item.capability);
+    });
+
+    const resolveGroup = (ref) => {
+      if (ref == null || ref === '') return null;
+      const key = String(ref).trim();
+      if (!key) return null;
+      const byId = groups.find((group) => group.id === key);
+      if (byId) return byId.id;
+      const byName = groups.find((group) => sameName(group.name, key));
+      if (byName) return byName.id;
+      return ensureGroup(key, '', true, '');
+    };
+
     const variables = [];
     const seen = new Set();
 
@@ -3339,17 +3988,22 @@
       }
       value = value == null ? '' : String(value);
       seen.add(name.toLowerCase());
-      variables.push({ name, value });
+      variables.push({ name, value, groupId: resolveGroup(item.group ?? item.groupId ?? item.groupName) });
     });
 
     const paths = [];
-    pathSource.forEach((item) => {
-      if (typeof item !== 'string') {
-        issues.push('已忽略非字符串的 Path 条目');
+    pathSource.forEach((item, index) => {
+      if (typeof item === 'string') {
+        const value = normalizeTextPath(item);
+        if (value) paths.push({ value, groupId: null });
         return;
       }
-      const value = item.trim();
-      if (value) paths.push(value);
+      if (item && typeof item === 'object') {
+        const value = normalizeTextPath(item.value ?? item.path ?? '');
+        if (value) paths.push({ value, groupId: resolveGroup(item.group ?? item.groupId ?? item.groupName) });
+        return;
+      }
+      issues.push(`已忽略第 ${index + 1} 个无效的 Path 条目`);
     });
 
     if (!variables.length && !paths.length) {
@@ -3365,7 +4019,7 @@
     const regex = /%([^%]+)%/g;
     const known = new Set(BUILTIN_MAP.keys());
     variables.forEach((item) => known.add(item.name.toLowerCase()));
-    variables.map((item) => item.value).concat(paths).forEach((text) => {
+    variables.map((item) => item.value).concat(paths.map((item) => item.value)).forEach((text) => {
       let match;
       regex.lastIndex = 0;
       while ((match = regex.exec(text))) {
@@ -3379,14 +4033,14 @@
     const seenPaths = new Set();
     let duplicateCount = 0;
     paths.forEach((item) => {
-      const key = normalizePathValue(item);
+      const key = normalizePathValue(item.value);
       if (seenPaths.has(key)) duplicateCount += 1;
       else seenPaths.add(key);
     });
     if (duplicateCount) warnings.push(`Path 中有 ${duplicateCount} 条重复路径`);
 
     return {
-      data: { variables, paths },
+      data: { groups, variables, paths },
       warnings,
       formatLabel,
       exportedAt: raw && typeof raw === 'object' && !Array.isArray(raw) ? raw.exportedAt : null
@@ -3417,9 +4071,14 @@
       els.importFileMeta.textContent = `${file.name} · ${formatBytes(file.size)}`;
       els.importVarCount.textContent = String(parsed.data.variables.length);
       els.importPathCount.textContent = String(parsed.data.paths.length);
+      els.importGroupCount.textContent = String(parsed.data.groups.length);
 
+      const groupNames = parsed.data.groups.slice(0, 4).map((item) => `<span class="mono">${esc(item.name)}</span>`).join('、');
+      const groupLine = parsed.data.groups.length
+        ? `<div><strong>分组：</strong>${groupNames}${parsed.data.groups.length > 4 ? ` 等 ${parsed.data.groups.length} 个` : ''}</div>`
+        : '';
       const varNames = parsed.data.variables.slice(0, 6).map((item) => `<span class="mono">${esc(item.name)}</span>`).join('、');
-      const pathNames = parsed.data.paths.slice(0, 3).map((item) => `<span class="mono">${esc(item)}</span>`).join('、');
+      const pathNames = parsed.data.paths.slice(0, 3).map((item) => `<span class="mono">${esc(item.value)}</span>`).join('、');
       const varLine = parsed.data.variables.length
         ? `<div><strong>变量：</strong>${varNames}${parsed.data.variables.length > 6 ? ` 等 ${parsed.data.variables.length} 个` : ''}</div>`
         : '<div><strong>变量：</strong>无</div>';
@@ -3430,7 +4089,7 @@
       if (parsed.formatLabel) metaBits.push(`格式 ${esc(parsed.formatLabel)}`);
       if (parsed.exportedAt) metaBits.push(`导出于 ${esc(String(parsed.exportedAt))}`);
       const metaLine = metaBits.length ? `<div style="margin-top:6px;color:var(--text-tertiary);font-size:10px">${metaBits.join(' · ')}</div>` : '';
-      els.importPreview.innerHTML = `${varLine}${pathLine}${metaLine}`;
+      els.importPreview.innerHTML = `${groupLine}${varLine}${pathLine}${metaLine}`;
 
       els.importWarning.hidden = parsed.warnings.length === 0;
       const warningText = parsed.warnings.slice(0, 4).join('；') + (parsed.warnings.length > 4 ? `；另有 ${parsed.warnings.length - 4} 条提示` : '');
@@ -3448,13 +4107,24 @@
   }
 
   function exportData() {
-    const paths = state.paths.map((item) => item.trim()).filter(Boolean);
+    const enabled = state.paths.filter((item) => isGroupEnabled(item.groupId) && item.value.trim());
+    const disabled = state.paths.filter((item) => !isGroupEnabled(item.groupId) && item.value.trim());
+    const items = state.paths
+      .filter((item) => item.value.trim())
+      .map((item) => ({ value: item.value.trim(), group: item.groupId }));
     const payload = {
       format: 'win-env-studio',
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
-      variables: state.variables.map((item) => ({ name: item.name, value: item.value })),
-      path: paths
+      groups: state.groups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        enabled: group.enabled,
+        capability: group.capability
+      })),
+      variables: state.variables.map((item) => ({ name: item.name, value: item.value, group: item.groupId })),
+      path: enabled.map((item) => item.value.trim()),
+      items
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -3465,9 +4135,8 @@
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1500);
-    const skipped = state.paths.length - paths.length;
     showToast(
-      `已导出 ${payload.variables.length} 个变量、${paths.length} 条路径${skipped ? `（忽略 ${skipped} 条空路径）` : ''}`,
+      `已导出 ${payload.groups.length} 个分组、${payload.variables.length} 个变量、${payload.path.length} 条启用路径${disabled.length ? `（${disabled.length} 条停用分组路径仍保留在 items 中）` : ''}`,
       { type: 'success' }
     );
   }
@@ -3479,15 +4148,17 @@
     }
     const snapshot = clone(state);
     const counts = {
+      groups: pendingImport.data.groups.length,
       variables: pendingImport.data.variables.length,
       paths: pendingImport.data.paths.length
     };
     state = clone(pendingImport.data);
+    normalizePathOrder();
     pendingImport = null;
     els.importDialog.close();
     renderAll();
     persistNow();
-    showToast(`已导入 ${counts.variables} 个变量、${counts.paths} 条路径`, {
+    showToast(`已导入 ${counts.groups} 个分组、${counts.variables} 个变量、${counts.paths} 条路径`, {
       type: 'success',
       actionLabel: '撤销',
       onAction: () => {
@@ -3539,7 +4210,7 @@
     });
     if (!confirmed) return;
     const snapshot = clone(state);
-    state = { variables: [], paths: [] };
+    state = { groups: [], variables: [], paths: [] };
     renderAll();
     persistNow();
     showToast('工作区已清空', {
@@ -3570,8 +4241,9 @@
     els.exportBtn.addEventListener('click', exportData);
     els.clearBtn.addEventListener('click', clearWorkspace);
     els.addVarBtn.addEventListener('click', () => openVarDialog(null));
-    els.addPathBtn.addEventListener('click', addPath);
-    els.importPathTextBtn.addEventListener('click', openPathTextDialog);
+    els.addPathBtn.addEventListener('click', () => addPath());
+    els.addGroupBtn.addEventListener('click', () => openGroupDialog(null));
+    els.importPathTextBtn.addEventListener('click', () => openPathTextDialog());
     els.copyPathBtn.addEventListener('click', copyAllPaths);
 
     els.varSearch.addEventListener('input', onVarSearchInput);
@@ -3607,6 +4279,10 @@
         return;
       }
       if (action === 'clear-var-filter') { clearVarSearch(); return; }
+      if (action === 'toggle-group') { toggleGroup(actionEl.dataset.group); return; }
+      if (action === 'edit-group') { openGroupDialog(actionEl.dataset.group); return; }
+      if (action === 'delete-group') { deleteGroup(actionEl.dataset.group); return; }
+      if (action === 'add-to-group') { openVarDialog(null, '', actionEl.dataset.group); return; }
       const row = actionEl.closest('.var-row');
       if (!row) return;
       const index = Number(row.dataset.index);
@@ -3629,12 +4305,16 @@
         openMissingVariableCreator([actionEl.dataset.varName]);
         return;
       }
+      if (action === 'toggle-group') { toggleGroup(actionEl.dataset.group); return; }
+      if (action === 'edit-group') { openGroupDialog(actionEl.dataset.group); return; }
+      if (action === 'delete-group') { deleteGroup(actionEl.dataset.group); return; }
+      if (action === 'add-to-group') { addPath(actionEl.dataset.group); return; }
       const row = actionEl.closest('.path-row');
       if (!row) return;
       const index = Number(row.dataset.index);
       if (action === 'show-path-warning') {
         const input = row.querySelector('.path-input');
-        const value = input ? input.value : (state.paths[index] || '');
+        const value = input ? input.value : (state.paths[index] ? state.paths[index].value : '');
         const unknown = unknownRefNames(value);
         if (unknown.length) {
           openMissingVariableCreator(unknown);
@@ -3653,7 +4333,7 @@
       if (!input) return;
       const index = Number(input.dataset.index);
       if (!Number.isInteger(index) || state.paths[index] === undefined) return;
-      state.paths[index] = input.value;
+      state.paths[index].value = input.value;
       updatePathRowWarning(input);
       renderStats();
       scheduleSave();
@@ -3673,7 +4353,9 @@
         if (suggestState.open && suggestState.items.length) return;
         event.preventDefault();
         closeSuggest();
-        state.paths.splice(index + 1, 0, '');
+        const groupId = state.paths[index] ? state.paths[index].groupId : null;
+        state.paths.splice(index + 1, 0, { value: '', groupId });
+        normalizePathOrder();
         renderAll();
         scheduleSave();
         focusPathInput(index + 1);
@@ -3689,7 +4371,9 @@
       if (!lines.length) return;
       event.preventDefault();
       const index = Number(input.dataset.index);
-      state.paths.splice(index, 1, ...lines);
+      const groupId = state.paths[index] ? state.paths[index].groupId : null;
+      state.paths.splice(index, 1, ...lines.map((value) => ({ value, groupId })));
+      normalizePathOrder();
       renderAll();
       scheduleSave();
       focusPathInput(index + lines.length - 1);
@@ -3819,6 +4503,24 @@
     els.unknownDialog.addEventListener('close', updateDialogClass);
     els.unknownDialog.addEventListener('pointerdown', (event) => {
       if (event.target === els.unknownDialog) els.unknownDialog.close();
+    });
+
+    els.varGroupNew.addEventListener('click', () => openGroupDialog(null));
+    els.groupForm.addEventListener('submit', submitGroup);
+    els.groupName.addEventListener('input', () => setGroupNameError(''));
+    els.groupCancel.addEventListener('click', () => els.groupDialog.close());
+    els.groupDialogClose.addEventListener('click', () => els.groupDialog.close());
+    els.groupDelete.addEventListener('click', () => {
+      const targetId = editingGroupId;
+      els.groupDialog.close();
+      if (targetId) deleteGroup(targetId);
+    });
+    els.groupDialog.addEventListener('close', () => {
+      editingGroupId = null;
+      updateDialogClass();
+    });
+    els.groupDialog.addEventListener('pointerdown', (event) => {
+      if (event.target === els.groupDialog) els.groupDialog.close();
     });
 
     els.confirmOk.addEventListener('click', () => {
