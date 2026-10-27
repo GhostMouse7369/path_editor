@@ -1035,6 +1035,8 @@
   .field-inline { display: flex; align-items: center; gap: 8px; }
   .field-inline > select { flex: 1 1 auto; min-width: 0; }
   #groupDialog { width: min(470px, calc(100vw - 28px)); }
+  #movePathDialog { width: min(430px, calc(100vw - 28px)); }
+  .move-path-value { font-family: var(--font-mono); font-size: 10.5px; overflow-wrap: anywhere; }
 
   @media (max-width: 760px) {
     .group-meta { display: none; }
@@ -1815,7 +1817,7 @@
       </div>
       <div class="path-tip">
         <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
-        <span>可直接输入 <code>%变量名%</code> 引用已有变量。拖动把手可在分组间移动条目；停用的分组不会进入复制与导出的 Path。</span>
+        <span>可直接输入 <code>%变量名%</code> 引用已有变量。分组按名称排序，靠前优先；拖动手柄或点分组按钮可改归属。</span>
       </div>
       <div class="panel-toolbar">
         <div class="search-field">
@@ -2074,7 +2076,8 @@
             <label class="field-label" for="groupName">分组名称</label>
             <span class="field-required">必填 · 例如 NVM、Nodejs</span>
           </div>
-          <input type="text" class="text-input" id="groupName" placeholder="例如 NVM" autocomplete="off" spellcheck="false" maxlength="40" aria-describedby="groupNameError">
+          <input type="text" class="text-input" id="groupName" placeholder="例如 NVM" autocomplete="off" spellcheck="false" maxlength="40" aria-describedby="groupNameHint groupNameError">
+          <p class="field-hint" id="groupNameHint">分组按名称自动排序，靠前的分组在 Path 中优先级更高。</p>
           <p class="field-error" id="groupNameError" hidden></p>
         </div>
         <div class="field">
@@ -2102,6 +2105,45 @@
         <div class="footer-actions">
           <button type="button" class="btn btn-secondary" id="groupCancel">取消</button>
           <button type="submit" class="btn btn-primary" id="groupSave">保存分组</button>
+        </div>
+      </footer>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="movePathDialog" aria-labelledby="movePathTitle" aria-describedby="movePathSubtitle">
+  <div class="modal-card">
+    <header class="modal-header">
+      <div class="modal-icon" aria-hidden="true"><svg class="icon"><use href="#i-layers"></use></svg></div>
+      <div class="modal-heading">
+        <span class="modal-eyebrow">MOVE PATH</span>
+        <h2 class="modal-title" id="movePathTitle">更改所属分组</h2>
+        <p class="modal-subtitle" id="movePathSubtitle">把这条路径移动到另一个分组。</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="movePathDialogClose" aria-label="关闭">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </header>
+    <form id="movePathForm" novalidate>
+      <div class="modal-body">
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label" for="movePathGroup">目标分组</label>
+            <span class="field-hint-inline">移到组内末尾</span>
+          </div>
+          <select class="text-input" id="movePathGroup" aria-describedby="movePathHint"></select>
+          <p class="field-hint" id="movePathHint">分组按名称排序，靠前的分组在 Path 中优先级更高。</p>
+        </div>
+        <div class="inline-note inline-note--info">
+          <svg class="icon" aria-hidden="true"><use href="#i-route"></use></svg>
+          <span class="move-path-value" id="movePathValue"></span>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <span class="modal-footnote">移动后可在提示条中撤销</span>
+        <div class="footer-actions">
+          <button type="button" class="btn btn-secondary" id="movePathCancel">取消</button>
+          <button type="submit" class="btn btn-primary" id="movePathConfirm">移动</button>
         </div>
       </footer>
     </form>
@@ -2284,6 +2326,13 @@
     groupSave: $('groupSave'),
     groupCancel: $('groupCancel'),
     groupDialogClose: $('groupDialogClose'),
+    movePathDialog: $('movePathDialog'),
+    movePathForm: $('movePathForm'),
+    movePathSubtitle: $('movePathSubtitle'),
+    movePathGroup: $('movePathGroup'),
+    movePathValue: $('movePathValue'),
+    movePathCancel: $('movePathCancel'),
+    movePathDialogClose: $('movePathDialogClose'),
     suggestPopover: $('suggestPopover'),
     toastStack: $('toastStack'),
     fileInput: $('fileInput')
@@ -2293,6 +2342,7 @@
   let restoredFromStorage = false;
   let editingName = null;
   let editingGroupId = null;
+  let editingPathIndex = null;
   let pendingImport = null;
   let pendingPathText = null;
   let confirmResolver = null;
@@ -2434,6 +2484,14 @@
       .map((item, index) => ({ item, index }))
       .sort((a, b) => rank(a.item.groupId) - rank(b.item.groupId) || a.index - b.index)
       .map((entry) => entry.item);
+  }
+
+  const GROUP_NAME_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+  /** 分组默认按名称排序，Path 的组块顺序（即优先级）随之更新。 */
+  function sortGroups(target = state) {
+    target.groups.sort((a, b) => GROUP_NAME_COLLATOR.compare(a.name, b.name));
+    normalizePathOrder(target);
   }
 
   function newGroupId() {
@@ -2583,19 +2641,25 @@
     return { groups, variables, paths };
   }
 
+  function sampleState() {
+    const sample = clone(SAMPLE_STATE);
+    sortGroups(sample);
+    return sample;
+  }
+
   function loadInitialState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return clone(SAMPLE_STATE);
+      if (!raw) return sampleState();
       const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== 'object') return clone(SAMPLE_STATE);
+      if (!parsed || typeof parsed !== 'object') return sampleState();
       restoredFromStorage = true;
       const next = sanitizeState(parsed);
-      normalizePathOrder(next);
+      sortGroups(next);
       return next;
     } catch (error) {
       console.warn('读取本地草稿失败，使用示例数据。', error);
-      return clone(SAMPLE_STATE);
+      return sampleState();
     }
   }
 
@@ -2944,6 +3008,7 @@
           <div class="path-unknowns" ${unknown.length ? '' : 'hidden'}>${pathUnknownsInnerHtml(unknown)}</div>
         </div>
         <div class="path-actions">
+          <button type="button" class="path-action" data-action="move-group" title="更改所属分组（当前：${escAttr(groupLabel(item.groupId))}）" aria-label="更改第 ${item.index + 1} 条路径的分组">${iconMarkup('i-layers')}</button>
           <button type="button" class="path-action" data-action="up" title="${filteredMode ? '筛选时不可排序' : '组内上移'}" ${filteredMode || isFirst ? 'disabled' : ''} aria-label="上移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-up')}</button>
           <button type="button" class="path-action" data-action="down" title="${filteredMode ? '筛选时不可排序' : '组内下移'}" ${filteredMode || isLast ? 'disabled' : ''} aria-label="下移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-down')}</button>
           <button type="button" class="path-action path-action--danger" data-action="delete" title="删除这条路径" aria-label="删除第 ${item.index + 1} 条路径">${iconMarkup('i-trash')}</button>
@@ -3462,6 +3527,55 @@
     });
   }
 
+  function openMovePathDialog(index) {
+    const item = state.paths[index];
+    if (!item) return;
+    editingPathIndex = index;
+    els.movePathSubtitle.textContent = `把第 ${index + 1} 条路径移到其他分组，或取消归组。`;
+    els.movePathValue.textContent = item.value.trim() || '（这条路径还是空的）';
+    populateGroupSelect(els.movePathGroup, item.groupId);
+    els.movePathDialog.showModal();
+    updateDialogClass();
+    requestAnimationFrame(() => els.movePathGroup.focus());
+  }
+
+  function submitMovePath(event) {
+    event.preventDefault();
+    const item = editingPathIndex === null ? null : state.paths[editingPathIndex];
+    if (!item) {
+      els.movePathDialog.close();
+      showToast('这条路径已经不存在了，请刷新后重试。', { type: 'error' });
+      return;
+    }
+    const nextGroupId = groupById(els.movePathGroup.value) ? els.movePathGroup.value : null;
+    els.movePathDialog.close();
+    if ((item.groupId || null) === nextGroupId) {
+      showToast('这条路径已经在该分组中。', { type: 'info' });
+      return;
+    }
+    const snapshot = clone(state);
+    item.groupId = nextGroupId;
+    if (nextGroupId) setGroupCollapsed(nextGroupId, false);
+    normalizePathOrder();
+    const finalIndex = state.paths.indexOf(item);
+    renderAll();
+    persistNow();
+    showToast(`已移动到分组「${groupLabel(nextGroupId)}」`, {
+      type: 'success',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复移动前的分组', { type: 'success' });
+      }
+    });
+    requestAnimationFrame(() => {
+      const row = els.pathList.querySelector(`.path-row[data-index="${finalIndex}"]`);
+      if (row) row.classList.add('just-moved');
+    });
+  }
+
   function deletePathAt(index) {
     const item = state.paths[index];
     if (item === undefined) return;
@@ -3592,6 +3706,7 @@
     }
 
     els.groupDialog.close();
+    sortGroups();
     if (els.varDialog.open) populateGroupSelect(els.varGroup, createdId || els.varGroup.value);
     if (els.pathTextDialog.open) populateGroupSelect(els.pathTextGroup, createdId || els.pathTextGroup.value);
     renderAll();
@@ -4100,6 +4215,7 @@
     });
     if (duplicateCount) warnings.push(`Path 中有 ${duplicateCount} 条重复路径`);
 
+    groups.sort((a, b) => GROUP_NAME_COLLATOR.compare(a.name, b.name));
     return {
       data: { groups, variables, paths },
       warnings,
@@ -4214,7 +4330,7 @@
       paths: pendingImport.data.paths.length
     };
     state = clone(pendingImport.data);
-    normalizePathOrder();
+    sortGroups();
     pendingImport = null;
     els.importDialog.close();
     renderAll();
@@ -4386,6 +4502,7 @@
         }
         return;
       }
+      if (action === 'move-group') { openMovePathDialog(index); return; }
       if (action === 'up') movePath(index, -1);
       if (action === 'down') movePath(index, 1);
       if (action === 'delete') deletePathAt(index);
@@ -4584,6 +4701,17 @@
     });
     els.groupDialog.addEventListener('pointerdown', (event) => {
       if (event.target === els.groupDialog) els.groupDialog.close();
+    });
+
+    els.movePathForm.addEventListener('submit', submitMovePath);
+    els.movePathCancel.addEventListener('click', () => els.movePathDialog.close());
+    els.movePathDialogClose.addEventListener('click', () => els.movePathDialog.close());
+    els.movePathDialog.addEventListener('close', () => {
+      editingPathIndex = null;
+      updateDialogClass();
+    });
+    els.movePathDialog.addEventListener('pointerdown', (event) => {
+      if (event.target === els.movePathDialog) els.movePathDialog.close();
     });
 
     els.confirmOk.addEventListener('click', () => {
