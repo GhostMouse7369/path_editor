@@ -1,0 +1,3694 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="一个纯前端的 Windows 环境变量与 Path 编辑器，支持变量引用补全、排序和 JSON 导入导出。">
+<title>环境变量工作台 · Windows Env Studio</title>
+<style>
+  :root {
+    color-scheme: light;
+    --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    --font-mono: "Cascadia Code", "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --bg: #f3f6fb;
+    --bg-deep: #edf2f9;
+    --glow-blue: rgba(91, 161, 255, 0.22);
+    --glow-violet: rgba(157, 137, 255, 0.15);
+    --orb-blue: rgba(81, 148, 255, 0.22);
+    --orb-teal: rgba(68, 196, 190, 0.13);
+    --dot: rgba(68, 92, 130, 0.11);
+    --panel: rgba(255, 255, 255, 0.84);
+    --panel-solid: #ffffff;
+    --modal-bg: #ffffff;
+    --popover-bg: #ffffff;
+    --surface-subtle: #f7f9fc;
+    --surface-muted: #eef2f7;
+    --input-bg: #ffffff;
+    --border: #e2e8f0;
+    --border-strong: #cbd6e4;
+    --border-soft: #edf1f6;
+    --text: #172033;
+    --text-secondary: #536178;
+    --text-tertiary: #8491a6;
+    --accent: #0f6cbd;
+    --accent-hover: #0c5aa0;
+    --accent-bright: #1b7fd4;
+    --accent-soft: #e9f4ff;
+    --accent-soft-strong: #d9ecff;
+    --accent-border: #b9dcff;
+    --on-accent: #ffffff;
+    --success: #0d7a57;
+    --success-soft: #e8f7f1;
+    --warning: #9a5b00;
+    --warning-soft: #fff5dc;
+    --warning-border: #f1d8a2;
+    --danger: #b42318;
+    --danger-soft: #fef0ee;
+    --danger-border: #f5c9c4;
+    --teal: #087f75;
+    --teal-soft: #e7f7f4;
+    --teal-border: #b9e8e1;
+    --button-bg: rgba(255, 255, 255, 0.86);
+    --footer-bg: rgba(248, 250, 253, 0.72);
+    --path-bg: #fbfcfe;
+    --path-text: #243248;
+    --modal-footer: #fbfcfe;
+    --mark-bg: #fff0b8;
+    --scroll-thumb: #c8d4e2;
+    --tooltip-bg: #172033;
+    --tooltip-text: #ffffff;
+    --focus: rgba(15, 108, 189, 0.46);
+    --shadow-panel: 0 24px 60px -32px rgba(31, 55, 92, 0.28), 0 2px 8px rgba(31, 55, 92, 0.035);
+    --shadow-popover: 0 20px 50px -16px rgba(15, 35, 67, 0.34), 0 3px 12px rgba(15, 35, 67, 0.08);
+    --shadow-toast: 0 18px 46px -16px rgba(15, 35, 67, 0.32), 0 3px 10px rgba(15, 35, 67, 0.07);
+    --panel-height: clamp(552px, calc(100vh - 268px), 800px);
+  }
+
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0a1120;
+    --bg-deep: #0d1628;
+    --glow-blue: rgba(43, 111, 204, 0.2);
+    --glow-violet: rgba(111, 91, 210, 0.15);
+    --orb-blue: rgba(35, 100, 190, 0.26);
+    --orb-teal: rgba(28, 137, 133, 0.12);
+    --dot: rgba(151, 174, 205, 0.1);
+    --panel: rgba(16, 25, 42, 0.84);
+    --panel-solid: #101a2b;
+    --modal-bg: #121d30;
+    --popover-bg: #152238;
+    --surface-subtle: #151f32;
+    --surface-muted: #1b2840;
+    --input-bg: #0f192a;
+    --border: rgba(150, 171, 200, 0.16);
+    --border-strong: rgba(157, 180, 211, 0.28);
+    --border-soft: rgba(150, 171, 200, 0.1);
+    --text: #edf3fc;
+    --text-secondary: #a8b6cb;
+    --text-tertiary: #718198;
+    --accent: #5ab0ff;
+    --accent-hover: #7bc1ff;
+    --accent-bright: #74bbff;
+    --accent-soft: rgba(53, 129, 216, 0.16);
+    --accent-soft-strong: rgba(75, 152, 238, 0.24);
+    --accent-border: rgba(90, 176, 255, 0.34);
+    --on-accent: #071422;
+    --success: #65d9ab;
+    --success-soft: rgba(28, 133, 99, 0.16);
+    --warning: #f2b75d;
+    --warning-soft: rgba(164, 107, 17, 0.18);
+    --warning-border: rgba(242, 183, 93, 0.26);
+    --danger: #ff9086;
+    --danger-soft: rgba(180, 45, 32, 0.18);
+    --danger-border: rgba(255, 128, 116, 0.24);
+    --teal: #58d3c7;
+    --teal-soft: rgba(19, 127, 118, 0.16);
+    --teal-border: rgba(88, 211, 199, 0.24);
+    --button-bg: rgba(28, 42, 63, 0.88);
+    --footer-bg: rgba(11, 19, 33, 0.44);
+    --path-bg: #121d2f;
+    --path-text: #d9e5f4;
+    --modal-footer: #101a2b;
+    --mark-bg: rgba(255, 201, 72, 0.25);
+    --scroll-thumb: #37506e;
+    --tooltip-bg: #eef4ff;
+    --tooltip-text: #0d1726;
+    --focus: rgba(90, 176, 255, 0.56);
+    --shadow-panel: 0 26px 70px -38px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.24);
+    --shadow-popover: 0 24px 60px -18px rgba(0, 0, 0, 0.78), 0 3px 12px rgba(0, 0, 0, 0.35);
+    --shadow-toast: 0 22px 54px -18px rgba(0, 0, 0, 0.72), 0 3px 10px rgba(0, 0, 0, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { min-width: 320px; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    color: var(--text);
+    background:
+      radial-gradient(1100px 620px at 2% -12%, var(--glow-blue), transparent 62%),
+      radial-gradient(900px 560px at 100% -4%, var(--glow-violet), transparent 58%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  body.has-dialog { overflow: hidden; }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 0);
+    background-size: 23px 23px;
+    opacity: 0.55;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 72%);
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 72%);
+  }
+  ::selection { color: var(--text); background: var(--accent-soft-strong); }
+  button, input, textarea { font: inherit; }
+  button { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button:disabled { cursor: not-allowed; }
+  svg { display: block; }
+  .icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .icon .filled { fill: currentColor; stroke: none; }
+  .icon--sm { width: 15px; height: 15px; }
+  .icon--xs { width: 13px; height: 13px; }
+  .icon--lg { width: 21px; height: 21px; }
+
+  .ambient {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .ambient::before,
+  .ambient::after {
+    content: "";
+    position: absolute;
+    width: 540px;
+    height: 540px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.75;
+  }
+  .ambient::before { top: -220px; left: 38%; background: var(--orb-blue); }
+  .ambient::after { top: 26%; right: -300px; background: var(--orb-teal); }
+
+  .app-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 30px clamp(18px, 3.2vw, 42px) 22px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 28px;
+    animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .brand { display: flex; align-items: flex-start; gap: 16px; min-width: 0; }
+  .brand-mark {
+    position: relative;
+    width: 54px;
+    height: 54px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.24), transparent 44%),
+      linear-gradient(145deg, #2388df 0%, #0d67b5 56%, #0a4f8e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow:
+      0 16px 30px -12px rgba(15, 108, 189, 0.58),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    pointer-events: none;
+  }
+  .brand-copy { min-width: 0; padding-top: 1px; }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text-tertiary);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .eyebrow-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  h1 {
+    margin: 5px 0 6px;
+    font-size: clamp(25px, 2.3vw, 33px);
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--text);
+  }
+  .brand-subtitle {
+    margin: 0;
+    max-width: 580px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .top-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 7px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.45; transform: none; }
+  .btn .icon { margin-top: -0.5px; }
+  .btn-primary {
+    color: var(--on-accent);
+    background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+    border-color: color-mix(in srgb, var(--accent) 82%, #000 18%);
+    box-shadow: 0 7px 16px -10px rgba(15, 108, 189, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, var(--accent-bright), var(--accent-hover)); }
+  html[data-theme="dark"] .btn-primary {
+    background: linear-gradient(180deg, #68baff, #3ba0f5);
+    border-color: rgba(122, 195, 255, 0.55);
+    box-shadow: 0 8px 22px -12px rgba(54, 155, 255, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  html[data-theme="dark"] .btn-primary:hover { background: linear-gradient(180deg, #7cc5ff, #54aff8); }
+  .btn-secondary {
+    color: var(--text);
+    background: var(--button-bg);
+    border-color: var(--border);
+    box-shadow: 0 1px 2px rgba(16, 35, 61, 0.04);
+  }
+  .btn-secondary:hover { background: var(--panel-solid); border-color: var(--border-strong); }
+  .btn-ghost {
+    color: var(--text-secondary);
+    background: transparent;
+    border-color: transparent;
+  }
+  .btn-ghost:hover { color: var(--text); background: var(--surface-muted); }
+  .btn-danger {
+    color: #fff;
+    background: #b42318;
+    border-color: #981b12;
+    box-shadow: 0 7px 18px -11px rgba(180, 35, 24, 0.8);
+  }
+  .btn-danger:hover { background: #9d1d13; }
+  .btn-danger-ghost { color: var(--danger); }
+  .btn-danger-ghost:hover { color: var(--danger); background: var(--danger-soft); }
+  .btn-sm { min-height: 33px; padding: 0 11px; border-radius: 9px; font-size: 12px; gap: 6px; }
+  .btn-sm .icon { width: 15px; height: 15px; }
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    background: var(--button-bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--border-strong); background: var(--panel-solid); transform: translateY(-1px); }
+  .icon-btn:active { transform: translateY(0); }
+  .text-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 7px;
+    color: var(--text-tertiary);
+    background: transparent;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .text-btn:hover { color: var(--text); background: var(--surface-muted); }
+  .text-btn--danger:hover { color: var(--danger); background: var(--danger-soft); }
+  .text-btn .icon { width: 14px; height: 14px; }
+  .theme-icon-sun { display: none; }
+  html[data-theme="dark"] .theme-icon-sun { display: block; }
+  html[data-theme="dark"] .theme-icon-moon { display: none; }
+
+  /* ---------- Status strip ---------- */
+  .statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 17px 0 16px;
+    padding: 0 2px;
+    animation: rise-in 0.55s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .status-cluster { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 30px; }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--panel-solid) 66%, transparent);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success-soft);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .status-pill.is-saving .status-dot { background: var(--warning); box-shadow: 0 0 0 3px var(--warning-soft); animation: soft-pulse 1.2s ease-in-out infinite; }
+  .status-pill.is-error .status-dot { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+  .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-tertiary);
+    font-size: 11.5px;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .stat strong { color: var(--text-secondary); font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stat-sep { width: 1px; height: 12px; background: var(--border); }
+  .ref-stat { gap: 5px; color: var(--text-tertiary); font-weight: 500; }
+  .ref-stat.is-ok { color: var(--success); }
+  .ref-stat.is-warn { color: var(--warning); }
+  .ref-stat .icon { width: 13px; height: 13px; }
+
+  /* ---------- Workspace panels ---------- */
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.13fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+  .panel {
+    min-width: 0;
+    height: var(--panel-height);
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-panel);
+    backdrop-filter: blur(22px) saturate(1.12);
+    -webkit-backdrop-filter: blur(22px) saturate(1.12);
+    overflow: hidden;
+    animation: rise-in 0.6s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .panel--path { animation-delay: 0.16s; }
+  .panel-header {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex: 0 0 auto;
+  }
+  .panel-heading { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+  .panel-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    border: 1px solid transparent;
+  }
+  .panel-icon .icon { width: 20px; height: 20px; }
+  .panel-icon.vars {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+  }
+  .panel-icon.paths {
+    color: var(--teal);
+    background: var(--teal-soft);
+    border-color: var(--teal-border);
+  }
+  .panel-title-row { display: flex; align-items: center; gap: 8px; min-height: 22px; flex-wrap: wrap; }
+  .panel-title {
+    margin: 0;
+    font-size: 15.5px;
+    line-height: 1.25;
+    font-weight: 680;
+    letter-spacing: -0.012em;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 19px;
+    padding: 0 7px;
+    border-radius: 999px;
+    color: var(--text-secondary);
+    background: var(--surface-muted);
+    border: 1px solid var(--border-soft);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .panel-subtitle {
+    margin: 3px 0 0;
+    color: var(--text-tertiary);
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+  .panel-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 20px 12px;
+    flex: 0 0 auto;
+  }
+  .search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 37px;
+    padding: 0 8px 0 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    box-shadow: inset 0 1px 2px rgba(16, 35, 61, 0.025);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  }
+  .search-field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft), inset 0 1px 2px rgba(16, 35, 61, 0.02);
+  }
+  .search-field > .icon { color: var(--text-tertiary); width: 16px; height: 16px; }
+  .search-field input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    color: var(--text);
+    background: transparent;
+    font-size: 12.5px;
+  }
+  .search-field input::placeholder { color: var(--text-tertiary); }
+  .search-clear {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: pointer;
+  }
+  .search-clear:hover { color: var(--text); background: var(--surface-muted); }
+  .filter-lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    color: var(--warning);
+    font-size: 10.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .filter-lock .icon { width: 12px; height: 12px; }
+  .path-text-tools {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  .path-text-tools .text-btn { padding: 6px; font-size: 11px; white-space: nowrap; }
+  .path-text-divider { width: 1px; height: 16px; margin: 0 2px; background: var(--border); }
+
+  .path-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 0 20px 12px;
+    padding: 9px 11px;
+    border-radius: 9px;
+    color: var(--text-secondary);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    font-size: 11px;
+    line-height: 1.55;
+    flex: 0 0 auto;
+  }
+  .path-tip .icon { width: 14px; height: 14px; color: var(--accent); margin-top: 1px; }
+  .path-tip code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--panel-solid) 58%, transparent);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+  }
+
+  .table-shell { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; border-top: 1px solid var(--border-soft); }
+  .var-columns {
+    display: grid;
+    grid-template-columns: minmax(118px, 0.82fr) minmax(0, 1.22fr) 62px;
+    gap: 13px;
+    padding: 9px 20px 8px;
+    color: var(--text-tertiary);
+    font-size: 9.5px;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex: 0 0 auto;
+  }
+  .var-columns span:last-child { text-align: right; }
+  .var-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 10px 10px;
+    overscroll-behavior: contain;
+  }
+  .var-row {
+    display: grid;
+    grid-template-columns: minmax(118px, 0.82fr) minmax(0, 1.22fr) auto;
+    align-items: center;
+    gap: 13px;
+    padding: 10px 10px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    transition: background-color 0.14s ease, border-color 0.14s ease;
+  }
+  .var-row:hover { background: var(--surface-subtle); border-color: var(--border-soft); }
+  .var-ident { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .var-dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .var-name {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    color: var(--text);
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .var-name:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .ref-warning {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--warning);
+    background: var(--warning-soft);
+    border: 1px solid var(--warning-border);
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: help;
+  }
+  .var-value {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 2px 0;
+    border: 0;
+    color: var(--text-secondary);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.55;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .var-row:hover .var-value { color: var(--text); }
+  .var-value.is-empty { color: var(--text-tertiary); font-family: var(--font-sans); font-style: italic; font-size: 11px; }
+  .ref-token {
+    border-radius: 4px;
+    padding: 0 1px;
+    font-weight: 600;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .ref-token--known { color: var(--accent); background: var(--accent-soft); }
+  .ref-token--unknown { color: var(--warning); background: var(--warning-soft); text-decoration: underline dotted; text-underline-offset: 2px; }
+  mark.search-hit {
+    color: inherit;
+    background: var(--mark-bg);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  .var-actions { display: flex; align-items: center; justify-content: flex-end; gap: 1px; opacity: 0.55; transition: opacity 0.14s ease; }
+  .var-row:hover .var-actions, .var-row:focus-within .var-actions { opacity: 1; }
+  .row-action, .path-action {
+    width: 29px;
+    height: 29px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.14s ease, background-color 0.14s ease, opacity 0.14s ease;
+  }
+  .row-action .icon, .path-action .icon { width: 15px; height: 15px; }
+  .row-action:hover, .path-action:hover { color: var(--text); background: var(--surface-muted); }
+  .row-action--danger:hover, .path-action--danger:hover { color: var(--danger); background: var(--danger-soft); }
+  .path-action:disabled { opacity: 0.26; cursor: not-allowed; }
+  .path-action:disabled:hover { color: var(--text-tertiary); background: transparent; }
+
+  .path-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    overscroll-behavior: contain;
+  }
+  .path-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px 26px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 8px 7px 3px;
+    border-radius: 11px;
+    border: 1px solid var(--border);
+    background: var(--path-bg);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+  }
+  .path-row:hover { border-color: var(--border-strong); box-shadow: 0 2px 7px rgba(16, 35, 61, 0.035); }
+  .path-row:focus-within {
+    border-color: var(--accent);
+    background: var(--input-bg);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .path-row.dragging { opacity: 0.32; border-style: dashed; }
+  .path-row.drop-before::before,
+  .path-row.drop-after::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    z-index: 2;
+  }
+  .path-row.drop-before::before { top: -5px; }
+  .path-row.drop-after::after { bottom: -5px; }
+  .drag-handle {
+    width: 18px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: grab;
+    opacity: 0.55;
+    transition: opacity 0.14s ease, background-color 0.14s ease;
+  }
+  .drag-handle:hover { opacity: 1; background: var(--surface-muted); }
+  .drag-handle:active { cursor: grabbing; }
+  .drag-handle .icon { width: 13px; height: 17px; }
+  .path-list.is-filtered .drag-handle { opacity: 0.2; cursor: not-allowed; }
+  .path-index {
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    user-select: none;
+  }
+  .path-field { position: relative; min-width: 0; display: flex; align-items: center; }
+  .path-input {
+    width: 100%;
+    min-width: 0;
+    padding: 4px 27px 4px 3px;
+    border: 0;
+    outline: 0;
+    color: var(--path-text);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.55;
+    text-overflow: ellipsis;
+  }
+  .path-input::placeholder { color: var(--text-tertiary); font-family: var(--font-sans); }
+  .path-warning {
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 19px;
+    height: 19px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 6px;
+    color: var(--warning);
+    background: var(--warning-soft);
+    border: 1px solid var(--warning-border);
+    cursor: help;
+  }
+  .path-warning .icon { width: 11px; height: 11px; }
+  .path-actions { display: flex; align-items: center; gap: 0; opacity: 0.6; transition: opacity 0.14s ease; }
+  .path-row:hover .path-actions, .path-row:focus-within .path-actions { opacity: 1; }
+  .path-action { width: 27px; height: 27px; border-radius: 6px; }
+  .path-action .icon { width: 14px; height: 14px; }
+  .path-row.just-moved { animation: row-flash 0.55s ease-out; }
+
+  .empty-state {
+    flex: 1 1 auto;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 24px;
+  }
+  .empty-visual {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    color: var(--text-tertiary);
+    background: var(--surface-subtle);
+    border: 1px dashed var(--border-strong);
+  }
+  .empty-visual .icon { width: 22px; height: 22px; }
+  .empty-title { margin: 0; font-size: 13.5px; font-weight: 650; color: var(--text); }
+  .empty-text { max-width: 300px; margin: 5px 0 15px; color: var(--text-tertiary); font-size: 11.5px; line-height: 1.65; }
+  .empty-actions { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 20px;
+    flex: 0 0 auto;
+    border-top: 1px solid var(--border-soft);
+    background: var(--footer-bg);
+    color: var(--text-tertiary);
+    font-size: 10.5px;
+  }
+  .footer-hint { display: flex; align-items: center; gap: 5px; min-width: 0; line-height: 1.5; }
+  .footer-hint .icon { width: 13px; height: 13px; flex: 0 0 auto; }
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-bottom-color: var(--border-strong);
+    box-shadow: 0 1px 0 var(--border);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    line-height: 1;
+  }
+  .count-text {
+    flex: 0 0 auto;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 3px 0;
+    color: var(--text-tertiary);
+    font-size: 10.5px;
+  }
+  .page-footer span { display: inline-flex; align-items: center; gap: 5px; }
+  .page-footer .icon { width: 12px; height: 12px; }
+  .footer-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--border-strong); }
+
+  /* ---------- Dialogs ---------- */
+  dialog {
+    width: min(560px, calc(100vw - 28px));
+    max-width: none;
+    padding: 0;
+    border: 0;
+    color: var(--text);
+    background: transparent;
+    overflow: visible;
+  }
+  dialog::backdrop {
+    background: rgba(9, 20, 36, 0.46);
+    backdrop-filter: blur(7px) saturate(1.08);
+    -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    animation: backdrop-in 0.18s ease-out both;
+  }
+  .modal-card {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+    border-radius: 20px;
+    background: var(--modal-bg);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 36px 100px -26px rgba(5, 17, 37, 0.6), 0 4px 18px rgba(5, 17, 37, 0.12);
+    overflow: hidden;
+    animation: modal-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .modal-header {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 21px 22px 15px;
+    flex: 0 0 auto;
+  }
+  .modal-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+  }
+  .modal-icon .icon { width: 20px; height: 20px; }
+  .modal-heading { min-width: 0; padding-right: 30px; }
+  .modal-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text-tertiary);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+  }
+  .modal-title { margin: 0; color: var(--text); font-size: 18px; font-weight: 680; line-height: 1.3; letter-spacing: -0.02em; }
+  .modal-subtitle { margin: 4px 0 0; color: var(--text-tertiary); font-size: 11.5px; line-height: 1.5; }
+  .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 8px; background: transparent; border-color: transparent; }
+  .modal-close:hover { background: var(--surface-muted); border-color: transparent; }
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    padding: 3px 22px 4px;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex: 0 0 auto;
+    margin-top: 18px;
+    padding: 15px 22px 19px;
+    border-top: 1px solid var(--border-soft);
+    background: var(--modal-footer);
+  }
+  .footer-left { display: flex; align-items: center; gap: 6px; }
+  .footer-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-left: auto; }
+  .modal-footnote { color: var(--text-tertiary); font-size: 10.5px; line-height: 1.5; }
+
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .field-label { color: var(--text); font-size: 12px; font-weight: 650; line-height: 1.4; }
+  .field-required { color: var(--text-tertiary); font-size: 10px; }
+  .field-hint { margin: 0; color: var(--text-tertiary); font-size: 10.5px; line-height: 1.55; }
+  .field-hint-inline { color: var(--text-tertiary); font-size: 10px; }
+  .text-input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    background: var(--input-bg);
+    font-size: 13px;
+    line-height: 1.5;
+    outline: 0;
+    box-shadow: inset 0 1px 2px rgba(16, 35, 61, 0.03);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  }
+  .text-input::placeholder { color: var(--text-tertiary); }
+  .text-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), inset 0 1px 2px rgba(16, 35, 61, 0.02); }
+  .mono { font-family: var(--font-mono); }
+  textarea.text-input { min-height: 91px; height: 91px; padding: 10px 12px; resize: vertical; font-size: 12px; line-height: 1.6; }
+  .field.has-error .text-input { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+  .field-error {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    color: var(--danger);
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+  .rename-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+  .rename-note .icon { width: 13px; height: 13px; margin-top: 1px; }
+  .ref-check {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+  .ref-check-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ref-check-label { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-weight: 600; }
+  .ref-check-label .icon { width: 13px; height: 13px; }
+  .ref-check-summary { color: var(--text-tertiary); font-size: 10px; }
+  .ref-check-summary.is-warn { color: var(--warning); }
+  .ref-chips { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .ref-chip {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 1.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ref-chip.is-known { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-border); }
+  .ref-chip.is-unknown { color: var(--warning); background: var(--warning-soft); border: 1px solid var(--warning-border); }
+  .ref-empty { color: var(--text-tertiary); font-size: 10.5px; }
+
+  .import-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .import-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 13px 14px;
+    border-radius: 11px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+  .import-stat strong { color: var(--text); font-family: var(--font-mono); font-size: 24px; font-weight: 650; line-height: 1.1; letter-spacing: -0.03em; }
+  .import-preview { color: var(--text-secondary); font-size: 11px; line-height: 1.65; }
+  .import-preview strong { color: var(--text); font-weight: 600; }
+  .import-preview .mono { color: var(--text); font-size: 10.5px; }
+  .inline-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 9px 11px;
+    border-radius: 9px;
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+  .inline-note .icon { width: 14px; height: 14px; margin-top: 1px; flex: 0 0 auto; }
+  .inline-note--warning { color: var(--warning); background: var(--warning-soft); border: 1px solid var(--warning-border); }
+  .inline-note--info { color: var(--text-secondary); background: var(--surface-subtle); border: 1px solid var(--border-soft); }
+  .inline-note--info .icon { color: var(--text-tertiary); }
+  .import-file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: var(--text-tertiary);
+    font-size: 10.5px;
+  }
+  .import-file .icon { width: 13px; height: 13px; flex: 0 0 auto; }
+  #importDialog { width: min(510px, calc(100vw - 28px)); }
+  #pathTextDialog { width: min(520px, calc(100vw - 28px)); }
+  .path-textarea { min-height: 148px; height: 148px; }
+  .path-text-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .path-text-actions .field-hint { flex: 1 1 180px; margin: 0; }
+  #pathTextHint[data-tone="warn"] { color: var(--warning); }
+  #pathTextHint[data-tone="ok"] { color: var(--success); }
+  .import-summary--three { grid-template-columns: repeat(3, 1fr); }
+  #pathTextWarningText { word-break: break-word; }
+
+  #confirmDialog { width: min(440px, calc(100vw - 28px)); }
+  .modal-card--sm { border-radius: 18px; }
+  .confirm-body { padding: 23px 23px 5px; display: flex; flex-direction: column; align-items: flex-start; }
+  .confirm-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 13px;
+    border-radius: 12px;
+    color: var(--danger);
+    background: var(--danger-soft);
+    border: 1px solid var(--danger-border);
+  }
+  .confirm-icon .icon { width: 20px; height: 20px; }
+  .confirm-title { margin: 0; color: var(--text); font-size: 16.5px; font-weight: 680; line-height: 1.35; letter-spacing: -0.015em; }
+  .confirm-description { margin: 5px 0 0; color: var(--text-secondary); font-size: 11.5px; line-height: 1.65; }
+  .modal-card--sm .modal-footer { margin-top: 16px; padding: 14px 22px 17px; }
+
+  /* ---------- Autocomplete popover ---------- */
+  .suggest-popover {
+    position: fixed;
+    z-index: 1400;
+    width: 360px;
+    max-width: calc(100vw - 16px);
+    overflow: hidden;
+    border-radius: 13px;
+    border: 1px solid var(--border-strong);
+    background: var(--popover-bg);
+    box-shadow: var(--shadow-popover);
+    animation: popover-in 0.13s ease-out both;
+  }
+  .suggest-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px 7px;
+    color: var(--text-tertiary);
+    font-size: 9.5px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .suggest-head-title { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-weight: 650; letter-spacing: 0.02em; }
+  .suggest-key {
+    display: inline-grid;
+    place-items: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 5px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .suggest-count { font-family: var(--font-mono); font-size: 9px; }
+  .suggest-list { max-height: 294px; overflow-y: auto; padding: 4px; }
+  .suggest-option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    padding: 7px 8px;
+    border: 0;
+    border-radius: 8px;
+    color: var(--text);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+  .suggest-option:hover, .suggest-option.is-active { background: var(--accent-soft); }
+  .suggest-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .suggest-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .suggest-percent { color: var(--text-tertiary); font-weight: 400; }
+  .suggest-badge {
+    flex: 0 0 auto;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--text-tertiary);
+    background: var(--surface-muted);
+    border: 1px solid var(--border-soft);
+    font-family: var(--font-sans);
+    font-size: 8.5px;
+    line-height: 1.35;
+  }
+  .suggest-value {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 1.45;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .suggest-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 11px;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-tertiary);
+    font-size: 9px;
+  }
+  .suggest-foot span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .suggest-foot kbd { height: 15px; min-width: 15px; padding: 0 3px; font-size: 8px; }
+  .suggest-empty { padding: 20px 12px; text-align: center; color: var(--text-tertiary); font-size: 10.5px; line-height: 1.65; }
+
+  /* ---------- Toasts ---------- */
+  .toast-stack {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1500;
+    width: min(370px, calc(100vw - 28px));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 10px 10px 11px;
+    border-radius: 12px;
+    border: 1px solid var(--border-strong);
+    background: var(--popover-bg);
+    box-shadow: var(--shadow-toast);
+    pointer-events: auto;
+    animation: toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .toast.is-leaving { animation: toast-out 0.16s ease-in both; }
+  .toast-icon {
+    width: 25px;
+    height: 25px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--success);
+    background: var(--success-soft);
+  }
+  .toast-icon .icon { width: 14px; height: 14px; }
+  .toast--error .toast-icon { color: var(--danger); background: var(--danger-soft); }
+  .toast--warning .toast-icon { color: var(--warning); background: var(--warning-soft); }
+  .toast--info .toast-icon { color: var(--accent); background: var(--accent-soft); }
+  .toast-text { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--text-secondary); font-size: 11.5px; line-height: 1.5; }
+  .toast-action {
+    flex: 0 0 auto;
+    padding: 4px 6px;
+    border: 0;
+    border-radius: 5px;
+    color: var(--accent);
+    background: transparent;
+    font-size: 10.5px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+  .toast-action:hover { background: var(--accent-soft); }
+  .toast-close {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: pointer;
+  }
+  .toast-close:hover { color: var(--text); background: var(--surface-muted); }
+  .toast-close .icon { width: 12px; height: 12px; }
+
+  /* ---------- Scrollbars ---------- */
+  * { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { border-radius: 999px; border: 2px solid transparent; background: var(--scroll-thumb); background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); background-clip: padding-box; border: 2px solid transparent; }
+
+  /* ---------- Animations ---------- */
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popover-in { from { opacity: 0; transform: translateY(-3px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes toast-out { to { opacity: 0; transform: translateY(5px) scale(0.99); } }
+  @keyframes soft-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @keyframes row-flash { 0% { background: var(--accent-soft-strong); border-color: var(--accent); } 100% { background: var(--path-bg); border-color: var(--border); } }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1120px) {
+    .workspace { grid-template-columns: 1fr; gap: 14px; }
+    .panel { height: auto; min-height: 0; }
+    .var-list { max-height: 440px; }
+    .path-list { max-height: 500px; }
+    .panel--path { animation-delay: 0.14s; }
+  }
+  @media (max-width: 760px) {
+    .app-shell { padding: 20px 14px 16px; }
+    .topbar { flex-direction: column; gap: 15px; }
+    .top-actions { width: 100%; justify-content: flex-start; padding-top: 0; }
+    .brand-mark { width: 48px; height: 48px; border-radius: 14px; font-size: 25px; }
+    .brand-subtitle { font-size: 11.5px; }
+    .statusbar { margin: 14px 0 12px; align-items: flex-start; }
+    .status-cluster { gap: 8px; }
+    .stat-sep { display: none; }
+    .panel-header { padding: 15px 15px 12px; }
+    .panel-subtitle { display: none; }
+    .panel-toolbar { padding: 0 15px 10px; flex-wrap: wrap; }
+    .path-text-tools { flex: 1 1 100%; justify-content: flex-end; }
+    .path-tip { margin: 0 15px 10px; }
+    .var-columns { display: none; }
+    .var-list { padding: 2px 8px 10px; }
+    .var-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2px 10px;
+      padding: 10px 9px;
+    }
+    .var-ident { grid-column: 1; grid-row: 1; }
+    .var-value { grid-column: 1; grid-row: 2; padding-left: 13px; font-size: 10.5px; }
+    .var-actions { grid-column: 2; grid-row: 1 / span 2; opacity: 0.8; }
+    .path-list { padding: 8px 11px 12px; }
+    .path-row { grid-template-columns: minmax(0, 1fr) auto; gap: 5px; padding: 7px 7px 7px 8px; }
+    .drag-handle, .path-index { display: none; }
+    .path-actions { opacity: 0.85; }
+    .path-action { width: 26px; height: 26px; }
+    .panel-footer { padding: 8px 15px; }
+    .footer-hint { font-size: 9.5px; }
+    .footer-hint kbd { display: none; }
+    .page-footer { padding-top: 12px; font-size: 9.5px; gap: 7px; }
+    .modal-header { padding: 18px 18px 13px; }
+    .modal-body { padding: 3px 18px 4px; gap: 15px; }
+    .modal-footer { margin-top: 16px; padding: 13px 18px 16px; }
+    .modal-footnote { display: none; }
+    .footer-actions { width: 100%; justify-content: flex-end; }
+    .footer-actions .btn { flex: 1 1 auto; }
+    .footer-left .btn { min-height: 34px; font-size: 11px; }
+    #confirmDialog .footer-actions { width: auto; }
+    #confirmDialog .footer-actions .btn { flex: 0 0 auto; }
+    .import-summary { gap: 8px; }
+    .import-stat { padding: 11px 12px; }
+    .import-stat strong { font-size: 21px; }
+    .suggest-popover { max-width: calc(100vw - 16px); }
+    .toast-stack { right: 14px; bottom: 14px; }
+  }
+  @media (max-width: 460px) {
+    .brand { gap: 12px; }
+    h1 { font-size: 24px; }
+    .top-actions { gap: 6px; }
+    .top-actions .btn { flex: 1 1 0; padding: 0 10px; }
+    .top-actions .icon-btn { width: 36px; height: 36px; }
+    .statusbar .status-pill { width: 100%; justify-content: center; }
+    .statusbar { gap: 9px; }
+    .panel-title { font-size: 14.5px; }
+    .panel-header .btn-sm { padding: 0 9px; }
+    .filter-lock { display: none; }
+    .var-actions .row-action { width: 27px; }
+    .btn-sm { font-size: 11px; }
+    .suggest-foot span:nth-child(2) { display: none; }
+    .confirm-body { padding: 20px 19px 4px; }
+    .modal-card--sm .modal-footer { padding: 13px 19px 16px; }
+    .page-footer { flex-direction: column; align-items: flex-start; gap: 5px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.2 4.2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.1A8.5 8.5 0 0 1 9.9 3.5 8.7 8.7 0 1 0 20.5 14.1Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7M6.5 7l.8 12a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9l.8-12M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="m14.5 5.5 4 4M4 20l1-5L16.8 3.2a1.7 1.7 0 0 1 2.4 0l1.6 1.6a1.7 1.7 0 0 1 0 2.4L9 19l-5 1Z"/><path d="m14 5.5 4.5 4.5"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><circle class="filled" cx="9" cy="7" r="1.25"/><circle class="filled" cx="15" cy="7" r="1.25"/><circle class="filled" cx="9" cy="12" r="1.25"/><circle class="filled" cx="15" cy="12" r="1.25"/><circle class="filled" cx="9" cy="17" r="1.25"/><circle class="filled" cx="15" cy="17" r="1.25"/></symbol>
+  <symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4.5M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.4 4.4L19 7.5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></symbol>
+  <symbol id="i-percent" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="5.5" r="2.5"/><path d="M7.9 17h3.6a4 4 0 0 0 4-4V9a4 4 0 0 1 4-4"/></symbol>
+  <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8.5 3H7.7A2.7 2.7 0 0 0 5 5.7v3.5a2.3 2.3 0 0 1-2.3 2.3A2.3 2.3 0 0 1 5 13.8v3.5A2.7 2.7 0 0 0 7.7 20h.8M15.5 3h.8A2.7 2.7 0 0 1 19 5.7v3.5a2.3 2.3 0 0 0 2.3 2.3A2.3 2.3 0 0 0 19 13.8v3.5a2.7 2.7 0 0 1-2.7 2.7h-.8"/></symbol>
+  <symbol id="i-arrows" viewBox="0 0 24 24"><path d="M8 4v16m0 0-3.5-3.5M8 20l3.5-3.5M16 20V4m0 0-3.5 3.5M16 4l3.5 3.5"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 5.5A2.5 2.5 0 0 0 12.5 3H6a3 3 0 0 0-3 3v6.5A2.5 2.5 0 0 0 5.5 15"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5V3.5A1.5 1.5 0 0 1 10.5 2h3A1.5 1.5 0 0 1 15 3.5v1M8.5 10h7M8.5 14h5"/></symbol>
+</svg>
+
+<div class="ambient" aria-hidden="true"></div>
+
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">%</div>
+      <div class="brand-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span>Windows Environment Studio</div>
+        <h1>环境变量工作台</h1>
+        <p class="brand-subtitle">整理 Windows 变量与 Path，支持引用补全、优先级排序和 JSON 备份。数据只留在这个浏览器里。</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="icon-btn" id="themeToggle" aria-label="切换到深色模式" title="切换主题">
+        <svg class="icon theme-icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+        <svg class="icon theme-icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+      </button>
+      <button type="button" class="btn btn-secondary" id="importBtn">
+        <svg class="icon" aria-hidden="true"><use href="#i-upload"></use></svg>
+        <span>导入 JSON</span>
+      </button>
+      <button type="button" class="btn btn-primary" id="exportBtn">
+        <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>
+        <span>导出 JSON</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="statusbar">
+    <div class="status-cluster">
+      <span class="status-pill" id="saveStatus" title="数据会自动保存在当前浏览器">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="saveText">本地草稿</span>
+      </span>
+      <span class="stat"><strong id="statVars">0</strong> 个变量</span>
+      <span class="stat-sep" aria-hidden="true"></span>
+      <span class="stat"><strong id="statPaths">0</strong> 条路径</span>
+      <span class="stat-sep" aria-hidden="true"></span>
+      <span class="stat ref-stat" id="refStat">引用校验通过</span>
+    </div>
+    <button type="button" class="text-btn text-btn--danger" id="clearBtn">
+      <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
+      清空工作区
+    </button>
+  </div>
+
+  <main class="workspace">
+    <section class="panel panel--vars" aria-labelledby="varsTitle">
+      <div class="panel-header">
+        <div class="panel-heading">
+          <div class="panel-icon vars" aria-hidden="true">
+            <svg class="icon"><use href="#i-percent"></use></svg>
+          </div>
+          <div>
+            <div class="panel-title-row">
+              <h2 class="panel-title" id="varsTitle">变量管理</h2>
+              <span class="badge" id="varBadge">0</span>
+            </div>
+            <p class="panel-subtitle">维护变量名称与值，值中可以嵌套引用其他变量。</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="addVarBtn">
+          <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+          <span>新增变量</span>
+        </button>
+      </div>
+      <div class="panel-toolbar">
+        <div class="search-field">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+          <input type="search" id="varSearch" placeholder="搜索变量名或值…" autocomplete="off" spellcheck="false" aria-label="搜索变量">
+          <button type="button" class="search-clear" id="clearVarSearch" aria-label="清除变量搜索" hidden>
+            <svg class="icon icon--xs" aria-hidden="true"><use href="#i-x"></use></svg>
+          </button>
+        </div>
+      </div>
+      <div class="table-shell">
+        <div class="var-columns" id="varColumns" aria-hidden="true">
+          <span>变量名称</span><span>变量值</span><span>操作</span>
+        </div>
+        <div class="var-list" id="varList" role="list" aria-label="变量列表"></div>
+      </div>
+      <div class="panel-footer">
+        <span class="footer-hint">
+          <svg class="icon" aria-hidden="true"><use href="#i-percent"></use></svg>
+          值中输入 <kbd>%</kbd> 唤起变量补全
+        </span>
+        <span class="count-text" id="varCountText">0 个变量</span>
+      </div>
+    </section>
+
+    <section class="panel panel--path" aria-labelledby="pathsTitle">
+      <div class="panel-header">
+        <div class="panel-heading">
+          <div class="panel-icon paths" aria-hidden="true">
+            <svg class="icon"><use href="#i-route"></use></svg>
+          </div>
+          <div>
+            <div class="panel-title-row">
+              <h2 class="panel-title" id="pathsTitle">Path 编辑器</h2>
+              <span class="badge" id="pathBadge">0</span>
+            </div>
+            <p class="panel-subtitle">按从上到下的顺序查找，靠前的目录拥有更高优先级。</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="addPathBtn">
+          <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+          <span>添加路径</span>
+        </button>
+      </div>
+      <div class="path-tip">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        <span>可直接输入 <code>%变量名%</code> 引用已有变量。拖动左侧把手或使用箭头调整顺序，筛选时排序会暂时锁定。</span>
+      </div>
+      <div class="panel-toolbar">
+        <div class="search-field">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+          <input type="search" id="pathSearch" placeholder="按关键字筛选路径…" autocomplete="off" spellcheck="false" aria-label="筛选路径">
+          <button type="button" class="search-clear" id="clearPathSearch" aria-label="清除路径筛选" hidden>
+            <svg class="icon icon--xs" aria-hidden="true"><use href="#i-x"></use></svg>
+          </button>
+        </div>
+        <span class="filter-lock" id="pathFilterLock" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+          排序已锁定
+        </span>
+        <div class="path-text-tools">
+          <button type="button" class="text-btn" id="importPathTextBtn" title="从换行或分号分隔的 Path 文本导入">
+            <svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>
+            <span>粘贴导入</span>
+          </button>
+          <span class="path-text-divider" aria-hidden="true"></span>
+          <button type="button" class="text-btn" id="copyPathBtn" title="复制全部 Path 到剪贴板（分号分隔）">
+            <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>
+            <span>复制全部</span>
+          </button>
+        </div>
+      </div>
+      <div class="path-list" id="pathList" role="list" aria-label="Path 条目列表"></div>
+      <div class="panel-footer">
+        <span class="footer-hint">
+          <svg class="icon" aria-hidden="true"><use href="#i-arrows"></use></svg>
+          <kbd>Alt</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> 快速移动当前条目
+        </span>
+        <span class="count-text" id="pathCountText">共 0 条</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <span>
+      <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+      纯前端运行，数据不会上传
+      <span class="footer-sep" aria-hidden="true"></span>
+      自动保存在浏览器本地
+    </span>
+    <span>JSON 可用于备份、迁移或导入其他设备</span>
+  </footer>
+</div>
+
+<dialog id="varDialog" aria-labelledby="varDialogTitle" aria-describedby="varDialogSubtitle">
+  <div class="modal-card">
+    <header class="modal-header">
+      <div class="modal-icon" aria-hidden="true"><svg class="icon"><use href="#i-percent"></use></svg></div>
+      <div class="modal-heading">
+        <span class="modal-eyebrow" id="varDialogEyebrow">NEW VARIABLE</span>
+        <h2 class="modal-title" id="varDialogTitle">新增变量</h2>
+        <p class="modal-subtitle" id="varDialogSubtitle">添加一个可在 Path 中通过 %变量名% 引用的变量。</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="varDialogClose" aria-label="关闭">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </header>
+    <form id="varForm" novalidate>
+      <div class="modal-body">
+        <div class="field" id="varNameField">
+          <div class="field-label-row">
+            <label class="field-label" for="varName">变量名称</label>
+            <span class="field-required">必填 · 不区分大小写</span>
+          </div>
+          <input type="text" class="text-input mono" id="varName" placeholder="例如 JAVA_HOME" autocomplete="off" spellcheck="false" maxlength="255" aria-describedby="varNameHint varNameError">
+          <p class="field-hint" id="varNameHint">不能包含 <code>=</code> 或 <code>%</code>，建议使用大写字母和下划线。</p>
+          <p class="field-error" id="varNameError" hidden></p>
+        </div>
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label" for="varValue">变量值</label>
+            <span class="field-hint-inline">支持 %变量名% 引用</span>
+          </div>
+          <textarea class="text-input mono" id="varValue" rows="3" placeholder="例如 C:\Program Files\Java\jdk-21" spellcheck="false" aria-describedby="varValueHint"></textarea>
+          <p class="field-hint" id="varValueHint">输入 <code>%</code> 会列出可引用的自定义变量与常用 Windows 系统变量。</p>
+          <div class="rename-note" id="renameNote" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+            <span>重命名后，其他值和 Path 中的同名引用会自动更新。</span>
+          </div>
+          <div class="ref-check" id="varRefPreview"></div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <div class="footer-left">
+          <button type="button" class="btn btn-ghost btn-danger-ghost" id="varDelete" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
+            删除变量
+          </button>
+        </div>
+        <div class="footer-actions">
+          <button type="button" class="btn btn-secondary" id="varCancel">取消</button>
+          <button type="submit" class="btn btn-primary" id="varSave">保存变量</button>
+        </div>
+      </footer>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="importDialog" aria-labelledby="importTitle">
+  <div class="modal-card">
+    <header class="modal-header">
+      <div class="modal-icon" aria-hidden="true"><svg class="icon"><use href="#i-file"></use></svg></div>
+      <div class="modal-heading">
+        <span class="modal-eyebrow">IMPORT JSON</span>
+        <h2 class="modal-title" id="importTitle">导入环境变量数据</h2>
+        <p class="modal-subtitle" id="importFileMeta">准备导入一个 JSON 文件。</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="importDialogClose" aria-label="关闭">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <div class="import-summary">
+        <div class="import-stat"><strong id="importVarCount">0</strong> 个变量</div>
+        <div class="import-stat"><strong id="importPathCount">0</strong> 条路径</div>
+      </div>
+      <div class="import-preview" id="importPreview"></div>
+      <div class="inline-note inline-note--warning" id="importWarning" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-alert"></use></svg>
+        <span id="importWarningText"></span>
+      </div>
+      <div class="inline-note inline-note--info">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        <span>导入会替换当前工作区内容。完成后可在右下角提示条中撤销。</span>
+      </div>
+    </div>
+    <footer class="modal-footer">
+      <span class="modal-footnote">支持本工具导出的 JSON</span>
+      <div class="footer-actions">
+        <button type="button" class="btn btn-secondary" id="importCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="importConfirm">导入并覆盖</button>
+      </div>
+    </footer>
+  </div>
+</dialog>
+
+<dialog id="pathTextDialog" aria-labelledby="pathTextTitle">
+  <div class="modal-card">
+    <header class="modal-header">
+      <div class="modal-icon" aria-hidden="true"><svg class="icon"><use href="#i-clipboard"></use></svg></div>
+      <div class="modal-heading">
+        <span class="modal-eyebrow">IMPORT PATH TEXT</span>
+        <h2 class="modal-title" id="pathTextTitle">从文本导入 Path</h2>
+        <p class="modal-subtitle">直接粘贴 Windows Path 内容，或从剪贴板读取；每行一条或用分号分隔。</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="pathTextDialogClose" aria-label="关闭">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <div class="field">
+        <div class="field-label-row">
+          <label class="field-label" for="pathTextInput">Path 文本</label>
+          <span class="field-hint-inline">自动跳过重复项</span>
+        </div>
+        <textarea class="text-input mono path-textarea" id="pathTextInput" rows="7" placeholder="%JAVA_HOME%\bin&#10;C:\Program Files\Git\cmd&#10;%SystemRoot%\System32" spellcheck="false" aria-describedby="pathTextHint"></textarea>
+        <div class="path-text-actions">
+          <button type="button" class="btn btn-secondary btn-sm" id="readClipboardBtn">
+            <svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>
+            读取剪贴板
+          </button>
+          <span class="field-hint" id="pathTextHint">每行一条，也可以使用分号分隔。</span>
+        </div>
+      </div>
+      <div class="import-summary import-summary--three">
+        <div class="import-stat"><strong id="pathTextTotal">0</strong> 条识别</div>
+        <div class="import-stat"><strong id="pathTextNew">0</strong> 条新增</div>
+        <div class="import-stat"><strong id="pathTextDup">0</strong> 条重复</div>
+      </div>
+      <div class="inline-note inline-note--warning" id="pathTextWarning" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-alert"></use></svg>
+        <span id="pathTextWarningText"></span>
+      </div>
+      <div class="inline-note inline-note--info">
+        <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg>
+        <span>相同路径会按 Windows 规则判断（忽略大小写与末尾反斜杠），只追加未出现过的条目。导入后可撤销。</span>
+      </div>
+    </div>
+    <footer class="modal-footer">
+      <span class="modal-footnote">支持直接粘贴 Windows 环境变量中的 Path 值</span>
+      <div class="footer-actions">
+        <button type="button" class="btn btn-secondary" id="pathTextCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="pathTextConfirm" disabled>追加到 Path</button>
+      </div>
+    </footer>
+  </div>
+</dialog>
+
+<dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription">
+  <div class="modal-card modal-card--sm">
+    <div class="confirm-body">
+      <div class="confirm-icon" aria-hidden="true"><svg class="icon"><use href="#i-alert"></use></svg></div>
+      <h2 class="confirm-title" id="confirmTitle">确认操作</h2>
+      <p class="confirm-description" id="confirmDescription"></p>
+    </div>
+    <footer class="modal-footer">
+      <div class="footer-left"></div>
+      <div class="footer-actions">
+        <button type="button" class="btn btn-secondary" id="confirmCancel">取消</button>
+        <button type="button" class="btn btn-danger" id="confirmOk">确认</button>
+      </div>
+    </footer>
+  </div>
+</dialog>
+
+<div class="suggest-popover" id="suggestPopover" hidden></div>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
+
+<script>
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'win-env-studio.state.v1';
+  const THEME_KEY = 'win-env-studio.theme.v1';
+
+  const BUILTIN_VARS = [
+    { name: 'SystemRoot', value: 'C:\\Windows' },
+    { name: 'windir', value: 'C:\\Windows' },
+    { name: 'SystemDrive', value: 'C:' },
+    { name: 'ProgramFiles', value: 'C:\\Program Files' },
+    { name: 'ProgramFiles(x86)', value: 'C:\\Program Files (x86)' },
+    { name: 'ProgramW6432', value: 'C:\\Program Files' },
+    { name: 'CommonProgramFiles', value: 'C:\\Program Files\\Common Files' },
+    { name: 'CommonProgramFiles(x86)', value: 'C:\\Program Files (x86)\\Common Files' },
+    { name: 'ProgramData', value: 'C:\\ProgramData' },
+    { name: 'ALLUSERSPROFILE', value: 'C:\\ProgramData' },
+    { name: 'PUBLIC', value: 'C:\\Users\\Public' },
+    { name: 'USERPROFILE', value: 'C:\\Users\\你的用户名' },
+    { name: 'APPDATA', value: '%USERPROFILE%\\AppData\\Roaming' },
+    { name: 'LOCALAPPDATA', value: '%USERPROFILE%\\AppData\\Local' },
+    { name: 'TEMP', value: '%USERPROFILE%\\AppData\\Local\\Temp' },
+    { name: 'TMP', value: '%USERPROFILE%\\AppData\\Local\\Temp' },
+    { name: 'HOMEDRIVE', value: 'C:' },
+    { name: 'HOMEPATH', value: '\\Users\\你的用户名' },
+    { name: 'USERNAME', value: '你的用户名' },
+    { name: 'COMPUTERNAME', value: 'DESKTOP-XXXXXXX' },
+    { name: 'COMSPEC', value: '%SystemRoot%\\system32\\cmd.exe' },
+    { name: 'PATHEXT', value: '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC' },
+    { name: 'OS', value: 'Windows_NT' },
+    { name: 'PROCESSOR_ARCHITECTURE', value: 'AMD64' },
+    { name: 'NUMBER_OF_PROCESSORS', value: '8' },
+    { name: 'OneDrive', value: '%USERPROFILE%\\OneDrive' },
+    { name: 'ChocolateyInstall', value: 'C:\\ProgramData\\chocolatey' }
+  ];
+
+  const SAMPLE_STATE = {
+    variables: [
+      { name: 'JAVA_HOME', value: 'C:\\Program Files\\Java\\jdk-21' },
+      { name: 'MAVEN_HOME', value: 'C:\\Program Files\\Apache\\maven-3.9.9' },
+      { name: 'NODE_HOME', value: 'C:\\Program Files\\nodejs' },
+      { name: 'NPM_CONFIG_PREFIX', value: '%APPDATA%\\npm-global' }
+    ],
+    paths: [
+      '%JAVA_HOME%\\bin',
+      '%MAVEN_HOME%\\bin',
+      '%NODE_HOME%',
+      '%APPDATA%\\npm-global',
+      '%SystemRoot%\\System32',
+      '%SystemRoot%',
+      '%SystemRoot%\\System32\\Wbem',
+      '%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\'
+    ]
+  };
+
+  const BUILTIN_MAP = new Map(BUILTIN_VARS.map((item) => [item.name.toLowerCase(), item]));
+
+  const $ = (id) => document.getElementById(id);
+
+  const els = {
+    html: document.documentElement,
+    saveStatus: $('saveStatus'),
+    saveText: $('saveText'),
+    statVars: $('statVars'),
+    statPaths: $('statPaths'),
+    refStat: $('refStat'),
+    clearBtn: $('clearBtn'),
+    themeToggle: $('themeToggle'),
+    importBtn: $('importBtn'),
+    exportBtn: $('exportBtn'),
+    addVarBtn: $('addVarBtn'),
+    addPathBtn: $('addPathBtn'),
+    varSearch: $('varSearch'),
+    clearVarSearch: $('clearVarSearch'),
+    varList: $('varList'),
+    varBadge: $('varBadge'),
+    varCountText: $('varCountText'),
+    pathSearch: $('pathSearch'),
+    clearPathSearch: $('clearPathSearch'),
+    pathFilterLock: $('pathFilterLock'),
+    importPathTextBtn: $('importPathTextBtn'),
+    copyPathBtn: $('copyPathBtn'),
+    pathList: $('pathList'),
+    pathBadge: $('pathBadge'),
+    pathCountText: $('pathCountText'),
+    varDialog: $('varDialog'),
+    varForm: $('varForm'),
+    varDialogEyebrow: $('varDialogEyebrow'),
+    varDialogTitle: $('varDialogTitle'),
+    varDialogSubtitle: $('varDialogSubtitle'),
+    varName: $('varName'),
+    varNameField: $('varNameField'),
+    varNameError: $('varNameError'),
+    varValue: $('varValue'),
+    varRefPreview: $('varRefPreview'),
+    renameNote: $('renameNote'),
+    varSave: $('varSave'),
+    varCancel: $('varCancel'),
+    varDelete: $('varDelete'),
+    varDialogClose: $('varDialogClose'),
+    importDialog: $('importDialog'),
+    importFileMeta: $('importFileMeta'),
+    importVarCount: $('importVarCount'),
+    importPathCount: $('importPathCount'),
+    importPreview: $('importPreview'),
+    importWarning: $('importWarning'),
+    importWarningText: $('importWarningText'),
+    importConfirm: $('importConfirm'),
+    importCancel: $('importCancel'),
+    importDialogClose: $('importDialogClose'),
+    pathTextDialog: $('pathTextDialog'),
+    pathTextInput: $('pathTextInput'),
+    pathTextHint: $('pathTextHint'),
+    pathTextTotal: $('pathTextTotal'),
+    pathTextNew: $('pathTextNew'),
+    pathTextDup: $('pathTextDup'),
+    pathTextWarning: $('pathTextWarning'),
+    pathTextWarningText: $('pathTextWarningText'),
+    pathTextConfirm: $('pathTextConfirm'),
+    pathTextCancel: $('pathTextCancel'),
+    pathTextDialogClose: $('pathTextDialogClose'),
+    readClipboardBtn: $('readClipboardBtn'),
+    confirmDialog: $('confirmDialog'),
+    confirmTitle: $('confirmTitle'),
+    confirmDescription: $('confirmDescription'),
+    confirmOk: $('confirmOk'),
+    confirmCancel: $('confirmCancel'),
+    suggestPopover: $('suggestPopover'),
+    toastStack: $('toastStack'),
+    fileInput: $('fileInput')
+  };
+
+  let state = null;
+  let restoredFromStorage = false;
+  let editingName = null;
+  let pendingImport = null;
+  let pendingPathText = null;
+  let confirmResolver = null;
+  let saveTimer = null;
+  let saveErrorShown = false;
+  let dragIndex = null;
+  let dragArmed = false;
+  let dropTarget = null;
+
+  const suggestState = {
+    open: false,
+    input: null,
+    items: [],
+    active: 0,
+    start: 0,
+    end: 0,
+    query: ''
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Generic helpers                                                     */
+  /* ------------------------------------------------------------------ */
+
+  function clone(value) {
+    if (typeof structuredClone === 'function') return structuredClone(value);
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function esc(value) {
+    return String(value).replace(/[&<>"']/g, (char) => {
+      switch (char) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return char;
+      }
+    });
+  }
+
+  function escAttr(value) {
+    return esc(value).replace(/\n/g, '&#10;');
+  }
+
+  function iconMarkup(id, extraClass = '') {
+    const cls = extraClass ? `icon ${extraClass}` : 'icon';
+    return `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
+  }
+
+  function highlightText(text, query) {
+    const source = String(text);
+    if (!query) return esc(source);
+    const lower = source.toLowerCase();
+    const needle = query.toLowerCase();
+    let html = '';
+    let cursor = 0;
+    let found = lower.indexOf(needle, cursor);
+    if (found === -1) return esc(source);
+    while (found !== -1) {
+      html += esc(source.slice(cursor, found));
+      html += `<mark class="search-hit">${esc(source.slice(found, found + needle.length))}</mark>`;
+      cursor = found + needle.length;
+      found = lower.indexOf(needle, cursor);
+    }
+    html += esc(source.slice(cursor));
+    return html;
+  }
+
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  }
+
+  function dateStamp() {
+    const date = new Date();
+    const pad = (value) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+  }
+
+  function currentTimeLabel() {
+    return new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function sameName(a, b) {
+    return String(a).toLowerCase() === String(b).toLowerCase();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* State and persistence                                               */
+  /* ------------------------------------------------------------------ */
+
+  function loadInitialState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return clone(SAMPLE_STATE);
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.variables) || !Array.isArray(parsed.paths)) {
+        return clone(SAMPLE_STATE);
+      }
+      const seen = new Set();
+      const variables = [];
+      parsed.variables.forEach((item) => {
+        if (!item || typeof item !== 'object') return;
+        const name = String(item.name ?? '').trim();
+        if (!name || seen.has(name.toLowerCase())) return;
+        const value = item.value == null ? '' : String(item.value);
+        seen.add(name.toLowerCase());
+        variables.push({ name, value });
+      });
+      restoredFromStorage = true;
+      return {
+        variables,
+        paths: parsed.paths.filter((item) => typeof item === 'string')
+      };
+    } catch (error) {
+      console.warn('读取本地草稿失败，使用示例数据。', error);
+      return clone(SAMPLE_STATE);
+    }
+  }
+
+  function setSaveStatus(kind, text, title) {
+    els.saveStatus.classList.toggle('is-saving', kind === 'saving');
+    els.saveStatus.classList.toggle('is-error', kind === 'error');
+    els.saveText.textContent = text;
+    if (title) els.saveStatus.title = title;
+  }
+
+  function scheduleSave() {
+    setSaveStatus('saving', '保存中…', '正在写入当前浏览器');
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(persistNow, 220);
+  }
+
+  function persistNow() {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    try {
+      const payload = {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        variables: state.variables,
+        paths: state.paths
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      saveErrorShown = false;
+      setSaveStatus('ok', '已自动保存', `最后保存于 ${currentTimeLabel()}，刷新后仍会保留`);
+    } catch (error) {
+      console.warn('保存失败', error);
+      setSaveStatus('error', '保存失败', '浏览器本地存储不可用，刷新页面后修改可能丢失');
+      if (!saveErrorShown) {
+        saveErrorShown = true;
+        showToast('自动保存失败：浏览器本地存储不可用。', { type: 'error', duration: 5200 });
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Theme                                                               */
+  /* ------------------------------------------------------------------ */
+
+  function applyTheme(theme, persist = true) {
+    const next = theme === 'dark' ? 'dark' : 'light';
+    els.html.dataset.theme = next;
+    els.themeToggle.setAttribute('aria-label', next === 'dark' ? '切换到浅色模式' : '切换到深色模式');
+    els.themeToggle.title = next === 'dark' ? '切换到浅色模式' : '切换到深色模式';
+    if (persist) {
+      try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* ignore */ }
+    }
+  }
+
+  function initTheme() {
+    let stored = null;
+    try { stored = localStorage.getItem(THEME_KEY); } catch (error) { /* ignore */ }
+    if (stored === 'light' || stored === 'dark') {
+      applyTheme(stored, false);
+      return;
+    }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light', false);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Reference helpers                                                   */
+  /* ------------------------------------------------------------------ */
+
+  function getKnownNames() {
+    const known = new Set(BUILTIN_MAP.keys());
+    state.variables.forEach((item) => known.add(item.name.toLowerCase()));
+    return known;
+  }
+
+  function extractRefs(text) {
+    const refs = [];
+    const seen = new Set();
+    const known = getKnownNames();
+    const regex = /%([^%]+)%/g;
+    let match;
+    while ((match = regex.exec(text))) {
+      const name = match[1].trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      refs.push({ name, known: known.has(key) });
+    }
+    return refs;
+  }
+
+  function unknownRefNames(text) {
+    return extractRefs(text).filter((item) => !item.known).map((item) => item.name);
+  }
+
+  function collectUnknownRefs() {
+    const known = getKnownNames();
+    const unknown = new Map();
+    const regex = /%([^%]+)%/g;
+    const texts = state.variables.map((item) => item.value).concat(state.paths);
+    texts.forEach((text) => {
+      let match;
+      regex.lastIndex = 0;
+      while ((match = regex.exec(text))) {
+        const name = match[1].trim();
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (!known.has(key) && !unknown.has(key)) unknown.set(key, name);
+      }
+    });
+    return unknown;
+  }
+
+  function renderValueHTML(value, query) {
+    const regex = /%([^%]+)%/g;
+    let html = '';
+    let cursor = 0;
+    let match;
+    while ((match = regex.exec(value))) {
+      html += highlightText(value.slice(cursor, match.index), query);
+      const inner = match[1];
+      const className = isKnownRef(inner) ? 'ref-token ref-token--known' : 'ref-token ref-token--unknown';
+      html += `<span class="${className}" title="${escAttr(isKnownRef(inner) ? '已定义变量：' + inner.trim() : '未定义变量：' + inner.trim())}">%${highlightText(inner, query)}%</span>`;
+      cursor = match.index + match[0].length;
+    }
+    html += highlightText(value.slice(cursor), query);
+    return html;
+  }
+
+  function isKnownRef(name) {
+    const key = name.trim().toLowerCase();
+    return BUILTIN_MAP.has(key) || state.variables.some((item) => item.name.toLowerCase() === key);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Rendering                                                           */
+  /* ------------------------------------------------------------------ */
+
+  function emptyStateHtml(iconId, title, text, actions) {
+    return `<div class="empty-state">
+      <div class="empty-visual">${iconMarkup(iconId)}</div>
+      <p class="empty-title">${esc(title)}</p>
+      <p class="empty-text">${esc(text)}</p>
+      <div class="empty-actions">${actions}</div>
+    </div>`;
+  }
+
+  function renderAll() {
+    closeSuggest();
+    renderVariables();
+    renderPaths();
+    renderStats();
+    syncSearchClearButtons();
+  }
+
+  function renderVariables() {
+    const query = els.varSearch.value.trim();
+    const lower = query.toLowerCase();
+    const items = state.variables
+      .map((item, index) => ({ ...item, index }))
+      .filter((item) => !lower || item.name.toLowerCase().includes(lower) || item.value.toLowerCase().includes(lower));
+
+    els.varBadge.textContent = String(state.variables.length);
+    els.varCountText.textContent = query
+      ? `显示 ${items.length} / 共 ${state.variables.length} 个`
+      : `共 ${state.variables.length} 个变量`;
+
+    if (!items.length) {
+      if (!state.variables.length) {
+        els.varList.innerHTML = emptyStateHtml(
+          'i-percent',
+          '还没有变量',
+          '先创建 JAVA_HOME、NODE_HOME 这样的变量，之后就能在 Path 中直接引用。',
+          `<button type="button" class="btn btn-secondary btn-sm" data-action="add-var">${iconMarkup('i-plus')}新增变量</button>
+           <button type="button" class="btn btn-ghost btn-sm" data-action="import-json">${iconMarkup('i-upload')}导入 JSON</button>`
+        );
+      } else {
+        els.varList.innerHTML = emptyStateHtml(
+          'i-search',
+          '没有匹配的变量',
+          `没有找到包含「${query}」的变量名或变量值，试试其他关键字。`,
+          `<button type="button" class="btn btn-secondary btn-sm" data-action="clear-var-filter">${iconMarkup('i-x')}清除搜索</button>`
+        );
+      }
+      return;
+    }
+
+    els.varList.innerHTML = items.map((item) => {
+      const valueEmpty = item.value.trim() === '';
+      const unknown = unknownRefNames(item.value);
+      const warning = unknown.length
+        ? `<span class="ref-warning" title="${escAttr('未知变量引用：' + unknown.join('、'))}" aria-label="${escAttr('未知变量引用：' + unknown.join('、'))}">!</span>`
+        : '';
+      return `<div class="var-row" role="listitem" data-index="${item.index}">
+        <div class="var-ident">
+          <span class="var-dot" aria-hidden="true"></span>
+          <button type="button" class="var-name" data-action="edit" title="编辑 ${escAttr(item.name)}">${highlightText(item.name, query)}</button>
+          ${warning}
+        </div>
+        <button type="button" class="var-value${valueEmpty ? ' is-empty' : ''}" data-action="edit" title="${escAttr(item.value || '（空值）')}">${valueEmpty ? '（空值）' : renderValueHTML(item.value, query)}</button>
+        <div class="var-actions">
+          <button type="button" class="row-action" data-action="edit" title="编辑 ${escAttr(item.name)}" aria-label="编辑 ${escAttr(item.name)}">${iconMarkup('i-edit')}</button>
+          <button type="button" class="row-action row-action--danger" data-action="delete" title="删除 ${escAttr(item.name)}" aria-label="删除 ${escAttr(item.name)}">${iconMarkup('i-trash')}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function normalizePathValue(value) {
+    return String(value).trim().replace(/\//g, '\\').replace(/\\+$/g, '').toLowerCase();
+  }
+
+  function getPathWarnings(value, index) {
+    const warnings = [];
+    const normalized = normalizePathValue(value);
+    if (normalized) {
+      const duplicateIndex = state.paths.findIndex((item, itemIndex) => {
+        return itemIndex !== index && normalizePathValue(item) === normalized;
+      });
+      if (duplicateIndex !== -1) warnings.push(`与第 ${duplicateIndex + 1} 条路径重复`);
+    }
+    const unknown = unknownRefNames(value);
+    if (unknown.length) warnings.push(`未知变量：${unknown.join('、')}`);
+    return warnings;
+  }
+
+  function renderPaths() {
+    const query = els.pathSearch.value.trim();
+    const lower = query.toLowerCase();
+    const filtered = state.paths
+      .map((value, index) => ({ value, index }))
+      .filter((item) => !lower || item.value.toLowerCase().includes(lower));
+    const filteredMode = Boolean(query);
+
+    els.pathBadge.textContent = String(state.paths.length);
+    els.pathCountText.textContent = query
+      ? `显示 ${filtered.length} / 共 ${state.paths.length} 条`
+      : `共 ${state.paths.length} 条`;
+    els.pathFilterLock.hidden = !filteredMode;
+    els.pathList.classList.toggle('is-filtered', filteredMode);
+
+    if (!filtered.length) {
+      if (!state.paths.length) {
+        els.pathList.innerHTML = emptyStateHtml(
+          'i-route',
+          'Path 还是空的',
+          '添加一个目录，比如 %SystemRoot%\\System32，再用拖动或箭头安排它们的查找顺序。',
+          `<button type="button" class="btn btn-secondary btn-sm" data-action="add-path">${iconMarkup('i-plus')}添加路径</button>`
+        );
+      } else {
+        els.pathList.innerHTML = emptyStateHtml(
+          'i-search',
+          '没有匹配的路径',
+          `没有找到包含「${query}」的路径。清除筛选后可继续调整顺序。`,
+          `<button type="button" class="btn btn-secondary btn-sm" data-action="clear-path-filter">${iconMarkup('i-x')}清除筛选</button>`
+        );
+      }
+      return;
+    }
+
+    els.pathList.innerHTML = filtered.map((item) => {
+      const warnings = getPathWarnings(item.value, item.index);
+      const warningTitle = warnings.join('；');
+      const isFirst = item.index === 0;
+      const isLast = item.index === state.paths.length - 1;
+      return `<div class="path-row" role="listitem" data-index="${item.index}" draggable="false">
+        <button type="button" class="drag-handle" title="${filteredMode ? '筛选时不可拖动排序' : '拖动调整顺序'}" aria-label="拖动第 ${item.index + 1} 条路径排序" ${filteredMode ? 'disabled' : ''}>${iconMarkup('i-grip')}</button>
+        <span class="path-index" aria-hidden="true">${String(item.index + 1).padStart(2, '0')}</span>
+        <div class="path-field">
+          <input type="text" class="path-input" data-index="${item.index}" value="${escAttr(item.value)}" placeholder="例如 %SystemRoot%\\System32" autocomplete="off" spellcheck="false" aria-label="Path 第 ${item.index + 1} 条" aria-invalid="${warnings.length ? 'true' : 'false'}">
+          <span class="path-warning" ${warnings.length ? `title="${escAttr(warningTitle)}" aria-label="${escAttr(warningTitle)}" tabindex="0"` : 'hidden'}>${iconMarkup('i-alert')}</span>
+        </div>
+        <div class="path-actions">
+          <button type="button" class="path-action" data-action="up" title="${filteredMode ? '筛选时不可排序' : '上移'}" ${filteredMode || isFirst ? 'disabled' : ''} aria-label="上移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-up')}</button>
+          <button type="button" class="path-action" data-action="down" title="${filteredMode ? '筛选时不可排序' : '下移'}" ${filteredMode || isLast ? 'disabled' : ''} aria-label="下移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-down')}</button>
+          <button type="button" class="path-action path-action--danger" data-action="delete" title="删除这条路径" aria-label="删除第 ${item.index + 1} 条路径">${iconMarkup('i-trash')}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderStats() {
+    els.statVars.textContent = String(state.variables.length);
+    els.statPaths.textContent = String(state.paths.length);
+    const unknown = collectUnknownRefs();
+    if (unknown.size) {
+      const names = Array.from(unknown.values());
+      const preview = names.slice(0, 6).join('、') + (names.length > 6 ? ' 等' : '');
+      els.refStat.className = 'stat ref-stat is-warn';
+      els.refStat.innerHTML = `${iconMarkup('i-alert')}<span>${unknown.size} 个未知引用</span>`;
+      els.refStat.title = `以下变量被引用但尚未定义：${preview}`;
+    } else {
+      els.refStat.className = 'stat ref-stat is-ok';
+      els.refStat.innerHTML = `${iconMarkup('i-check')}<span>引用校验通过</span>`;
+      els.refStat.title = '所有 %变量名% 引用都能找到对应变量或系统内置变量';
+    }
+  }
+
+  function syncSearchClearButtons() {
+    els.clearVarSearch.hidden = !els.varSearch.value;
+    els.clearPathSearch.hidden = !els.pathSearch.value;
+  }
+
+  function updatePathRowWarning(input) {
+    const row = input.closest('.path-row');
+    if (!row) return;
+    const index = Number(input.dataset.index);
+    const warnings = getPathWarnings(input.value, index);
+    const warning = row.querySelector('.path-warning');
+    if (warning) {
+      warning.hidden = warnings.length === 0;
+      if (warnings.length) {
+        warning.title = warnings.join('；');
+        warning.setAttribute('aria-label', warnings.join('；'));
+      } else {
+        warning.removeAttribute('title');
+        warning.removeAttribute('aria-label');
+      }
+    }
+    input.setAttribute('aria-invalid', warnings.length ? 'true' : 'false');
+  }
+
+  function refreshPathWarnings() {
+    els.pathList.querySelectorAll('.path-input').forEach((input) => updatePathRowWarning(input));
+    renderStats();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Dialogs and confirmation                                           */
+  /* ------------------------------------------------------------------ */
+
+  function updateDialogClass() {
+    const hasOpen = Boolean(document.querySelector('dialog[open]'));
+    document.body.classList.toggle('has-dialog', hasOpen);
+  }
+
+  function settleConfirm(value) {
+    const resolver = confirmResolver;
+    confirmResolver = null;
+    if (resolver) resolver(value);
+  }
+
+  function askConfirm({ title, description, okLabel = '确认删除', danger = true }) {
+    if (confirmResolver) settleConfirm(false);
+    if (els.confirmDialog.open) els.confirmDialog.close();
+    els.confirmTitle.textContent = title;
+    els.confirmDescription.textContent = description;
+    els.confirmOk.textContent = okLabel;
+    els.confirmOk.className = danger ? 'btn btn-danger' : 'btn btn-primary';
+    els.confirmDialog.showModal();
+    updateDialogClass();
+    requestAnimationFrame(() => els.confirmCancel.focus());
+    return new Promise((resolve) => {
+      confirmResolver = resolve;
+    });
+  }
+
+  function openVarDialog(index) {
+    const item = typeof index === 'number' ? state.variables[index] : null;
+    editingName = item ? item.name : null;
+    const isEdit = Boolean(item);
+
+    els.varDialogEyebrow.textContent = isEdit ? 'EDIT VARIABLE' : 'NEW VARIABLE';
+    els.varDialogTitle.textContent = isEdit ? '编辑变量' : '新增变量';
+    els.varDialogSubtitle.textContent = isEdit
+      ? '修改名称或值。如果重命名，其他值和 Path 中的引用会自动同步。'
+      : '添加一个可在 Path 中通过 %变量名% 引用的变量。';
+    els.varSave.textContent = isEdit ? '保存更改' : '保存变量';
+    els.varDelete.hidden = !isEdit;
+    els.varName.value = item ? item.name : '';
+    els.varValue.value = item ? item.value : '';
+    els.renameNote.hidden = true;
+    setVarNameError('');
+    refreshVarRefPreview();
+    closeSuggest();
+    els.varDialog.showModal();
+    updateDialogClass();
+    requestAnimationFrame(() => {
+      els.varName.focus();
+      if (isEdit) els.varName.select();
+    });
+  }
+
+  function setVarNameError(message) {
+    const hasError = Boolean(message);
+    els.varNameField.classList.toggle('has-error', hasError);
+    els.varNameError.hidden = !hasError;
+    els.varNameError.innerHTML = hasError ? `${iconMarkup('i-alert')}<span>${esc(message)}</span>` : '';
+    els.varName.setAttribute('aria-invalid', hasError ? 'true' : 'false');
+  }
+
+  function validateVariableName(name) {
+    if (!name) return '请输入变量名称。';
+    if (name.length > 255) return '变量名称不能超过 255 个字符。';
+    if (name.includes('%')) return '变量名称不能包含 %。';
+    if (name.includes('=')) return '变量名称不能包含 =。';
+    if (/[\u0000-\u001f]/.test(name)) return '变量名称不能包含控制字符。';
+    const duplicate = state.variables.find((item) => {
+      if (editingName && sameName(item.name, editingName)) return false;
+      return sameName(item.name, name);
+    });
+    if (duplicate) return `变量「${duplicate.name}」已经存在，请换一个名称。`;
+    return '';
+  }
+
+  function updateRenameNote() {
+    const changed = Boolean(editingName) && !sameName(els.varName.value.trim(), editingName);
+    els.renameNote.hidden = !changed;
+  }
+
+  function refreshVarRefPreview() {
+    const refs = extractRefs(els.varValue.value);
+    const unknown = refs.filter((item) => !item.known);
+    let summary;
+    if (!refs.length) {
+      summary = '<span class="ref-check-summary">未使用引用</span>';
+    } else if (unknown.length) {
+      summary = `<span class="ref-check-summary is-warn">${unknown.length} 个未知引用</span>`;
+    } else {
+      summary = `<span class="ref-check-summary">引用 ${refs.length} 个变量</span>`;
+    }
+    const chips = refs.map((item) => {
+      return `<span class="ref-chip ${item.known ? 'is-known' : 'is-unknown'}" title="${escAttr(item.known ? '已定义' : '未定义')}">%${esc(item.name)}%</span>`;
+    }).join('');
+    els.varRefPreview.innerHTML = `<div class="ref-check-head">
+        <span class="ref-check-label">${iconMarkup('i-braces')}引用检查</span>
+        ${summary}
+      </div>
+      ${refs.length ? `<div class="ref-chips">${chips}</div>` : '<span class="ref-empty">尚未使用引用，输入 % 可快速插入变量。</span>'}`;
+  }
+
+  function rewriteReferences(oldName, newName) {
+    const source = oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`%${source}%`, 'gi');
+    const replacement = `%${newName}%`;
+    state.variables.forEach((item) => {
+      item.value = item.value.replace(regex, replacement);
+    });
+    state.paths = state.paths.map((item) => item.replace(regex, replacement));
+  }
+
+  function submitVariable(event) {
+    event.preventDefault();
+    const name = els.varName.value.trim();
+    const error = validateVariableName(name);
+    if (error) {
+      setVarNameError(error);
+      els.varName.focus();
+      return;
+    }
+    const value = els.varValue.value;
+    const isEdit = Boolean(editingName);
+    if (isEdit) {
+      const index = state.variables.findIndex((item) => sameName(item.name, editingName));
+      if (index === -1) {
+        els.varDialog.close();
+        showToast('这个变量已经不存在了，请刷新后重试。', { type: 'error' });
+        return;
+      }
+      if (!sameName(name, editingName)) rewriteReferences(editingName, name);
+      state.variables[index] = { name, value };
+    } else {
+      state.variables.push({ name, value });
+    }
+    els.varDialog.close();
+    renderAll();
+    persistNow();
+    showToast(isEdit ? `变量 ${name} 已更新` : `已添加变量 ${name}`, { type: 'success' });
+  }
+
+  async function deleteVariableAt(index) {
+    const item = state.variables[index];
+    if (!item) return;
+    const confirmed = await askConfirm({
+      title: `删除变量「${item.name}」？`,
+      description: 'Path 和其他变量中对该变量的引用会被保留，但会变成未知引用，需要手动处理。',
+      okLabel: '删除变量'
+    });
+    if (!confirmed) return;
+    const snapshot = clone(state);
+    state.variables.splice(index, 1);
+    renderAll();
+    persistNow();
+    showToast(`已删除变量 ${item.name}`, {
+      type: 'warning',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复删除的变量', { type: 'success' });
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Path operations                                                     */
+  /* ------------------------------------------------------------------ */
+
+  function addPath() {
+    if (els.pathSearch.value.trim()) {
+      els.pathSearch.value = '';
+      syncSearchClearButtons();
+    }
+    state.paths.push('');
+    renderAll();
+    scheduleSave();
+    focusPathInput(state.paths.length - 1);
+  }
+
+  function focusPathInput(index) {
+    requestAnimationFrame(() => {
+      const input = els.pathList.querySelector(`.path-input[data-index="${index}"]`);
+      if (!input) return;
+      input.focus();
+      const end = input.value.length;
+      input.setSelectionRange(end, end);
+      input.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function normalizeTextPath(value) {
+    let text = String(value ?? '').trim();
+    if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) {
+      text = text.slice(1, -1).trim();
+    }
+    return text;
+  }
+
+  function computePathTextImport(text) {
+    const existing = new Set(state.paths.map(normalizePathValue).filter(Boolean));
+    const seen = new Set();
+    const entries = [];
+    const duplicates = [];
+    String(text).replace(/^\uFEFF/, '').split(/[\r\n;]+/).forEach((item) => {
+      const value = normalizeTextPath(item);
+      if (!value) return;
+      const key = normalizePathValue(value);
+      if (!key) return;
+      if (existing.has(key)) {
+        duplicates.push({ value, reason: 'existing' });
+        return;
+      }
+      if (seen.has(key)) {
+        duplicates.push({ value, reason: 'text' });
+        return;
+      }
+      seen.add(key);
+      entries.push(value);
+    });
+    return {
+      entries,
+      duplicates,
+      total: entries.length + duplicates.length,
+      existingDupCount: duplicates.filter((item) => item.reason === 'existing').length,
+      textDupCount: duplicates.filter((item) => item.reason === 'text').length
+    };
+  }
+
+  function setPathTextHint(message, tone) {
+    els.pathTextHint.textContent = message;
+    if (tone) els.pathTextHint.dataset.tone = tone;
+    else delete els.pathTextHint.dataset.tone;
+  }
+
+  function updatePathTextPreview() {
+    const result = computePathTextImport(els.pathTextInput.value);
+    pendingPathText = result;
+    els.pathTextTotal.textContent = String(result.total);
+    els.pathTextNew.textContent = String(result.entries.length);
+    els.pathTextDup.textContent = String(result.duplicates.length);
+
+    const duplicateCount = result.duplicates.length;
+    if (duplicateCount) {
+      const reasons = [];
+      if (result.existingDupCount) reasons.push(`与现有 Path 重复 ${result.existingDupCount} 条`);
+      if (result.textDupCount) reasons.push(`文本内重复 ${result.textDupCount} 条`);
+      const preview = result.duplicates.slice(0, 3).map((item) => item.value).join('、');
+      els.pathTextWarning.hidden = false;
+      els.pathTextWarningText.textContent = `已跳过 ${duplicateCount} 条相同路径（${reasons.join('，')}）：${preview}${duplicateCount > 3 ? ' 等' : ''}`;
+    } else {
+      els.pathTextWarning.hidden = true;
+      els.pathTextWarningText.textContent = '';
+    }
+
+    els.pathTextConfirm.disabled = result.entries.length === 0;
+    els.pathTextConfirm.textContent = result.entries.length ? `追加 ${result.entries.length} 条` : '没有可追加项';
+  }
+
+  function openPathTextDialog() {
+    pendingPathText = null;
+    els.pathTextInput.value = '';
+    setPathTextHint('每行一条，也可以使用分号分隔。');
+    updatePathTextPreview();
+    els.pathTextDialog.showModal();
+    updateDialogClass();
+    requestAnimationFrame(() => els.pathTextInput.focus());
+  }
+
+  async function readClipboardIntoText() {
+    try {
+      if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
+        throw new Error('Clipboard API unavailable');
+      }
+      const text = await navigator.clipboard.readText();
+      if (!text.trim()) {
+        setPathTextHint('剪贴板里没有可读取的文本。', 'warn');
+        els.pathTextInput.focus();
+        return;
+      }
+      els.pathTextInput.value = text;
+      updatePathTextPreview();
+      setPathTextHint(`已读取 ${text.length} 个字符，请确认下方统计后导入。`, 'ok');
+    } catch (error) {
+      setPathTextHint('浏览器未允许读取剪贴板，请点击上方输入框后按 Ctrl+V 粘贴。', 'warn');
+      els.pathTextInput.focus();
+    }
+  }
+
+  function commitPathTextImport() {
+    const result = pendingPathText || computePathTextImport(els.pathTextInput.value);
+    if (!result.entries.length) {
+      showToast('没有可追加的新路径。', { type: 'info' });
+      return;
+    }
+    const snapshot = clone(state);
+    const importedCount = result.entries.length;
+    const duplicateCount = result.duplicates.length;
+    if (els.pathSearch.value.trim()) {
+      els.pathSearch.value = '';
+      syncSearchClearButtons();
+    }
+    state.paths.push(...result.entries);
+    pendingPathText = null;
+    els.pathTextDialog.close();
+    renderAll();
+    persistNow();
+    showToast(
+      `已追加 ${importedCount} 条路径${duplicateCount ? `，跳过 ${duplicateCount} 条重复项` : ''}`,
+      {
+        type: 'success',
+        actionLabel: '撤销',
+        onAction: () => {
+          state = snapshot;
+          renderAll();
+          persistNow();
+          showToast('已恢复导入前的 Path', { type: 'success' });
+        }
+      }
+    );
+  }
+
+  async function writeClipboardText(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (error) {
+        /* Fall back to execCommand for file:// and restricted contexts. */
+      }
+    }
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.cssText = 'position:fixed;top:0;left:-9999px;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, area.value.length);
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } catch (error) {
+      copied = false;
+    }
+    area.remove();
+    return copied;
+  }
+
+  async function copyAllPaths() {
+    const paths = state.paths.map((item) => item.trim()).filter(Boolean);
+    if (!paths.length) {
+      showToast('Path 为空，没有可复制的内容。', { type: 'info' });
+      return;
+    }
+    const copied = await writeClipboardText(paths.join(';'));
+    if (!copied) {
+      showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
+      return;
+    }
+    showToast(`已复制 ${paths.length} 条路径（分号分隔，可直接粘贴到 Windows Path）`, { type: 'success' });
+  }
+
+  function movePath(index, delta) {
+    const target = index + delta;
+    if (target < 0 || target >= state.paths.length) return;
+    if (els.pathSearch.value.trim()) return;
+    const [item] = state.paths.splice(index, 1);
+    state.paths.splice(target, 0, item);
+    renderAll();
+    scheduleSave();
+    focusPathInput(target);
+    requestAnimationFrame(() => {
+      const row = els.pathList.querySelector(`.path-row[data-index="${target}"]`);
+      if (row) row.classList.add('just-moved');
+    });
+  }
+
+  function deletePathAt(index) {
+    const item = state.paths[index];
+    if (item === undefined) return;
+    const snapshot = clone(state);
+    state.paths.splice(index, 1);
+    renderAll();
+    persistNow();
+    showToast(`已删除第 ${index + 1} 条路径`, {
+      type: 'warning',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复删除的路径', { type: 'success' });
+      }
+    });
+  }
+
+  function reorderPath(fromIndex, toIndex, insertBefore) {
+    if (fromIndex === toIndex) return;
+    let insertIndex = toIndex + (insertBefore ? 0 : 1);
+    const [item] = state.paths.splice(fromIndex, 1);
+    if (fromIndex < insertIndex) insertIndex -= 1;
+    insertIndex = Math.max(0, Math.min(insertIndex, state.paths.length));
+    state.paths.splice(insertIndex, 0, item);
+    renderAll();
+    persistNow();
+    requestAnimationFrame(() => {
+      const row = els.pathList.querySelector(`.path-row[data-index="${insertIndex}"]`);
+      if (row) row.classList.add('just-moved');
+    });
+  }
+
+  function clearDragState() {
+    els.pathList.querySelectorAll('.path-row').forEach((row) => {
+      row.classList.remove('dragging', 'drop-before', 'drop-after');
+      row.setAttribute('draggable', 'false');
+    });
+    dragIndex = null;
+    dragArmed = false;
+    dropTarget = null;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Autocomplete                                                        */
+  /* ------------------------------------------------------------------ */
+
+  function detectRefContext(value, caret) {
+    let open = -1;
+    for (let index = 0; index < caret; index += 1) {
+      if (value[index] === '%') {
+        if (open === -1) open = index;
+        else open = -1;
+      }
+    }
+    if (open === -1) return null;
+    return {
+      start: open,
+      end: caret,
+      query: value.slice(open + 1, caret)
+    };
+  }
+
+  function getSuggestItems(query) {
+    const needle = query.trim().toLowerCase();
+    const excludeName = els.varDialog.open && editingName ? editingName.toLowerCase() : null;
+    const customNames = new Set(state.variables.map((item) => item.name.toLowerCase()));
+
+    const custom = state.variables
+      .filter((item) => item.name.toLowerCase() !== excludeName)
+      .map((item) => ({ name: item.name, value: item.value, kind: 'custom' }));
+
+    const builtin = BUILTIN_VARS
+      .filter((item) => !customNames.has(item.name.toLowerCase()))
+      .map((item) => ({ name: item.name, value: item.value, kind: 'builtin' }));
+
+    let items = custom.concat(builtin);
+    if (needle) {
+      items = items.filter((item) => item.name.toLowerCase().includes(needle));
+    }
+    items.sort((a, b) => {
+      if (!needle) return a.kind === b.kind ? a.name.localeCompare(b.name) : (a.kind === 'custom' ? -1 : 1);
+      const aStarts = a.name.toLowerCase().startsWith(needle) ? 0 : 1;
+      const bStarts = b.name.toLowerCase().startsWith(needle) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      if (a.kind !== b.kind) return a.kind === 'custom' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    return items.slice(0, 50);
+  }
+
+  function ensurePopoverHost(input) {
+    const host = input.closest('dialog') || document.body;
+    if (els.suggestPopover.parentElement !== host) host.appendChild(els.suggestPopover);
+  }
+
+  function openSuggest(input) {
+    const caret = input.selectionStart ?? input.value.length;
+    const context = detectRefContext(input.value, caret);
+    if (!context) {
+      closeSuggest();
+      return;
+    }
+    const items = getSuggestItems(context.query);
+    suggestState.open = true;
+    suggestState.input = input;
+    suggestState.items = items;
+    suggestState.active = 0;
+    suggestState.start = context.start;
+    suggestState.end = context.end;
+    suggestState.query = context.query;
+    ensurePopoverHost(input);
+    els.suggestPopover.hidden = false;
+    renderSuggestContent();
+    positionSuggest(input);
+  }
+
+  function refreshSuggest() {
+    if (!suggestState.open || !suggestState.input) return;
+    const input = suggestState.input;
+    const caret = input.selectionStart ?? input.value.length;
+    const context = detectRefContext(input.value, caret);
+    if (!context) {
+      closeSuggest();
+      return;
+    }
+    const queryChanged = context.query !== suggestState.query;
+    suggestState.start = context.start;
+    suggestState.end = context.end;
+    suggestState.query = context.query;
+    suggestState.items = getSuggestItems(context.query);
+    if (queryChanged) suggestState.active = 0;
+    if (suggestState.active >= suggestState.items.length) {
+      suggestState.active = Math.max(0, suggestState.items.length - 1);
+    }
+    renderSuggestContent();
+    positionSuggest(input);
+  }
+
+  function renderSuggestContent() {
+    const items = suggestState.items;
+    const query = suggestState.query;
+    const countLabel = query ? `${items.length} 个匹配` : `${items.length} 个可引用变量`;
+    let listHtml;
+    if (!items.length) {
+      listHtml = `<div class="suggest-empty">没有匹配「${esc(query)}」的变量。<br>可以继续输入，或先到变量管理中新增。</div>`;
+    } else {
+      listHtml = `<div class="suggest-list" role="listbox" aria-label="变量引用建议">${items.map((item, index) => {
+        const active = index === suggestState.active;
+        const kindLabel = item.kind === 'custom' ? '自定义' : '系统';
+        return `<button type="button" class="suggest-option${active ? ' is-active' : ''}" role="option" aria-selected="${active ? 'true' : 'false'}" data-suggest-index="${index}" title="${escAttr(item.value || '（空值）')}">
+          <span class="suggest-top">
+            <span class="suggest-name"><span class="suggest-percent">%</span>${highlightText(item.name, query)}<span class="suggest-percent">%</span></span>
+            <span class="suggest-badge">${kindLabel}</span>
+          </span>
+          <span class="suggest-value">${esc(item.value || '（空值）')}</span>
+        </button>`;
+      }).join('')}</div>`;
+    }
+    els.suggestPopover.innerHTML = `<div class="suggest-head">
+        <span class="suggest-head-title"><span class="suggest-key">%</span> 引用变量</span>
+        <span class="suggest-count">${countLabel}</span>
+      </div>
+      ${listHtml}
+      <div class="suggest-foot">
+        <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+        <span><kbd>Enter</kbd> 插入</span>
+        <span><kbd>Esc</kbd> 关闭</span>
+      </div>`;
+    requestAnimationFrame(() => {
+      const active = els.suggestPopover.querySelector('.suggest-option.is-active');
+      if (active) active.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function getCaretPoint(input) {
+    const style = window.getComputedStyle(input);
+    const mirror = document.createElement('div');
+    const properties = [
+      'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing',
+      'textTransform', 'textIndent', 'lineHeight', 'paddingTop', 'paddingRight',
+      'paddingBottom', 'paddingLeft', 'borderLeftWidth', 'borderTopWidth'
+    ];
+    properties.forEach((property) => { mirror.style[property] = style[property]; });
+    mirror.style.position = 'fixed';
+    mirror.style.left = '-9999px';
+    mirror.style.top = '0';
+    mirror.style.visibility = 'hidden';
+    mirror.style.pointerEvents = 'none';
+    mirror.style.borderStyle = 'solid';
+    mirror.style.borderColor = 'transparent';
+    mirror.style.overflow = 'hidden';
+    mirror.style.width = `${input.clientWidth}px`;
+    mirror.style.whiteSpace = input.tagName === 'TEXTAREA' ? 'pre-wrap' : 'pre';
+    mirror.style.wordBreak = input.tagName === 'TEXTAREA' ? 'break-word' : 'normal';
+    const caret = input.selectionStart ?? input.value.length;
+    mirror.textContent = input.value.slice(0, caret);
+    const marker = document.createElement('span');
+    marker.textContent = '\u200b';
+    mirror.appendChild(marker);
+    document.body.appendChild(mirror);
+
+    const rect = input.getBoundingClientRect();
+    const borderLeft = parseFloat(style.borderLeftWidth) || 0;
+    const borderTop = parseFloat(style.borderTopWidth) || 0;
+    const lineHeight = parseFloat(style.lineHeight) || (parseFloat(style.fontSize) || 12) * 1.5;
+    const x = rect.left + marker.offsetLeft + borderLeft - input.scrollLeft;
+    const y = rect.top + marker.offsetTop + borderTop - input.scrollTop + lineHeight;
+    mirror.remove();
+    return { x, y, inputTop: rect.top };
+  }
+
+  function positionSuggest(input) {
+    if (!suggestState.open) return;
+    const point = getCaretPoint(input);
+    const width = Math.min(360, window.innerWidth - 16);
+    els.suggestPopover.style.width = `${width}px`;
+    const popoverWidth = els.suggestPopover.offsetWidth || width;
+    const popoverHeight = els.suggestPopover.offsetHeight || 300;
+    let left = point.x - 14;
+    left = Math.max(8, Math.min(left, window.innerWidth - popoverWidth - 8));
+    let top = point.y + 6;
+    if (top + popoverHeight > window.innerHeight - 8 && point.inputTop > popoverHeight + 16) {
+      top = point.inputTop - popoverHeight - 8;
+    }
+    top = Math.max(8, Math.min(top, window.innerHeight - popoverHeight - 8));
+    els.suggestPopover.style.left = `${left}px`;
+    els.suggestPopover.style.top = `${top}px`;
+  }
+
+  function closeSuggest() {
+    suggestState.open = false;
+    suggestState.input = null;
+    suggestState.items = [];
+    suggestState.active = 0;
+    suggestState.query = '';
+    els.suggestPopover.hidden = true;
+    els.suggestPopover.innerHTML = '';
+  }
+
+  function handleRefInput(input, event) {
+    const typedPercent = Boolean(event && event.data === '%' && !event.isComposing);
+    if (suggestState.open && suggestState.input === input) {
+      refreshSuggest();
+      return;
+    }
+    if (typedPercent) openSuggest(input);
+  }
+
+  function commitSuggest(index) {
+    const item = suggestState.items[index];
+    const input = suggestState.input;
+    if (!item || !input) return;
+    const start = suggestState.start;
+    let end = input.selectionStart ?? suggestState.end;
+    if (input.value[end] === '%') end += 1;
+    const insert = `%${item.name}%`;
+    input.value = input.value.slice(0, start) + insert + input.value.slice(end);
+    const caret = start + insert.length;
+    closeSuggest();
+    input.focus();
+    input.setSelectionRange(caret, caret);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function moveSuggestActive(delta) {
+    if (!suggestState.items.length) return;
+    let next = suggestState.active + delta;
+    if (next < 0) next = suggestState.items.length - 1;
+    if (next >= suggestState.items.length) next = 0;
+    suggestState.active = next;
+    const options = els.suggestPopover.querySelectorAll('.suggest-option');
+    options.forEach((option, index) => {
+      option.classList.toggle('is-active', index === next);
+      option.setAttribute('aria-selected', index === next ? 'true' : 'false');
+    });
+    const active = options[next];
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Toasts                                                              */
+  /* ------------------------------------------------------------------ */
+
+  function showToast(message, options = {}) {
+    const type = options.type || 'success';
+    const duration = options.duration || (options.actionLabel ? 6800 : 3800);
+    const iconId = type === 'error' || type === 'warning' ? 'i-alert' : (type === 'info' ? 'i-info' : 'i-check');
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.innerHTML = `<span class="toast-icon">${iconMarkup(iconId)}</span>
+      <p class="toast-text">${esc(message)}</p>
+      ${options.actionLabel ? `<button type="button" class="toast-action">${esc(options.actionLabel)}</button>` : ''}
+      <button type="button" class="toast-close" aria-label="关闭提示">${iconMarkup('i-x')}</button>`;
+
+    while (els.toastStack.children.length >= 3) {
+      els.toastStack.firstElementChild.remove();
+    }
+    els.toastStack.appendChild(toast);
+
+    let dismissed = false;
+    let timer = null;
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      if (timer) clearTimeout(timer);
+      toast.classList.add('is-leaving');
+      setTimeout(() => toast.remove(), 180);
+    };
+    const armTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(dismiss, duration);
+    };
+    armTimer();
+
+    toast.querySelector('.toast-close').addEventListener('click', dismiss);
+    toast.addEventListener('mouseenter', () => { if (timer) clearTimeout(timer); });
+    toast.addEventListener('mouseleave', armTimer);
+    const action = toast.querySelector('.toast-action');
+    if (action) {
+      action.addEventListener('click', () => {
+        try { if (options.onAction) options.onAction(); } finally { dismiss(); }
+      });
+    }
+    return toast;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Import / export                                                     */
+  /* ------------------------------------------------------------------ */
+
+  function importIssueList() {
+    return [];
+  }
+
+  function parseImportData(raw) {
+    let variableSource;
+    let pathSource;
+    let formatLabel = '';
+
+    if (Array.isArray(raw)) {
+      variableSource = raw;
+      pathSource = [];
+    } else if (raw && typeof raw === 'object') {
+      variableSource = raw.variables ?? raw.Variables ?? [];
+      pathSource = raw.path ?? raw.paths ?? raw.Path ?? raw.PATH ?? [];
+      if (typeof raw.format === 'string') formatLabel = raw.format;
+    } else {
+      throw new Error('JSON 顶层必须是对象或数组。');
+    }
+
+    if (variableSource && !Array.isArray(variableSource) && typeof variableSource === 'object') {
+      variableSource = Object.entries(variableSource).map(([name, value]) => ({ name, value }));
+    }
+    if (pathSource && typeof pathSource === 'string') {
+      pathSource = pathSource.split(';');
+    }
+    if (!Array.isArray(variableSource)) throw new Error('variables 字段必须是数组。');
+    if (!Array.isArray(pathSource)) throw new Error('path 字段必须是数组或分号分隔的字符串。');
+
+    const issues = [];
+    const variables = [];
+    const seen = new Set();
+
+    variableSource.forEach((item, index) => {
+      if (!item || typeof item !== 'object') {
+        issues.push(`已忽略第 ${index + 1} 个无效变量条目`);
+        return;
+      }
+      const name = String(item.name ?? item.Name ?? item.key ?? '').trim();
+      if (!name || name.includes('%') || name.includes('=')) {
+        issues.push(`已忽略第 ${index + 1} 个名称无效的变量`);
+        return;
+      }
+      if (seen.has(name.toLowerCase())) {
+        issues.push(`已忽略重复变量 ${name}`);
+        return;
+      }
+      let value = item.value ?? item.Value ?? '';
+      if (value !== null && typeof value === 'object') {
+        issues.push(`已忽略变量 ${name} 的无效值`);
+        return;
+      }
+      value = value == null ? '' : String(value);
+      seen.add(name.toLowerCase());
+      variables.push({ name, value });
+    });
+
+    const paths = [];
+    pathSource.forEach((item) => {
+      if (typeof item !== 'string') {
+        issues.push('已忽略非字符串的 Path 条目');
+        return;
+      }
+      const value = item.trim();
+      if (value) paths.push(value);
+    });
+
+    if (!variables.length && !paths.length) {
+      throw new Error('文件中没有可导入的变量或 Path 数据。');
+    }
+
+    if (formatLabel && formatLabel !== 'win-env-studio') {
+      issues.push(`文件格式标识为「${formatLabel}」，已按兼容模式读取`);
+    }
+
+    const warnings = issues.slice();
+    const unknown = new Set();
+    const regex = /%([^%]+)%/g;
+    const known = new Set(BUILTIN_MAP.keys());
+    variables.forEach((item) => known.add(item.name.toLowerCase()));
+    variables.map((item) => item.value).concat(paths).forEach((text) => {
+      let match;
+      regex.lastIndex = 0;
+      while ((match = regex.exec(text))) {
+        const name = match[1].trim();
+        if (name && !known.has(name.toLowerCase())) unknown.add(name);
+      }
+    });
+    if (unknown.size) {
+      warnings.push(`有 ${unknown.size} 个引用未定义（${Array.from(unknown).slice(0, 4).join('、')}${unknown.size > 4 ? ' 等' : ''}）`);
+    }
+    const seenPaths = new Set();
+    let duplicateCount = 0;
+    paths.forEach((item) => {
+      const key = normalizePathValue(item);
+      if (seenPaths.has(key)) duplicateCount += 1;
+      else seenPaths.add(key);
+    });
+    if (duplicateCount) warnings.push(`Path 中有 ${duplicateCount} 条重复路径`);
+
+    return {
+      data: { variables, paths },
+      warnings,
+      formatLabel,
+      exportedAt: raw && typeof raw === 'object' && !Array.isArray(raw) ? raw.exportedAt : null
+    };
+  }
+
+  async function openImportPreview(file) {
+    els.importBtn.disabled = true;
+    pendingImport = null;
+    try {
+      const text = await file.text();
+      let raw;
+      try {
+        raw = JSON.parse(text.replace(/^\uFEFF/, ''));
+      } catch (error) {
+        throw new Error('JSON 解析失败，请确认文件内容格式正确。');
+      }
+      const parsed = parseImportData(raw);
+      pendingImport = {
+        fileName: file.name,
+        fileSize: file.size,
+        data: parsed.data,
+        warnings: parsed.warnings,
+        formatLabel: parsed.formatLabel,
+        exportedAt: parsed.exportedAt
+      };
+
+      els.importFileMeta.textContent = `${file.name} · ${formatBytes(file.size)}`;
+      els.importVarCount.textContent = String(parsed.data.variables.length);
+      els.importPathCount.textContent = String(parsed.data.paths.length);
+
+      const varNames = parsed.data.variables.slice(0, 6).map((item) => `<span class="mono">${esc(item.name)}</span>`).join('、');
+      const pathNames = parsed.data.paths.slice(0, 3).map((item) => `<span class="mono">${esc(item)}</span>`).join('、');
+      const varLine = parsed.data.variables.length
+        ? `<div><strong>变量：</strong>${varNames}${parsed.data.variables.length > 6 ? ` 等 ${parsed.data.variables.length} 个` : ''}</div>`
+        : '<div><strong>变量：</strong>无</div>';
+      const pathLine = parsed.data.paths.length
+        ? `<div><strong>Path：</strong>${pathNames}${parsed.data.paths.length > 3 ? ` 等 ${parsed.data.paths.length} 条` : ''}</div>`
+        : '<div><strong>Path：</strong>无</div>';
+      const metaBits = [];
+      if (parsed.formatLabel) metaBits.push(`格式 ${esc(parsed.formatLabel)}`);
+      if (parsed.exportedAt) metaBits.push(`导出于 ${esc(String(parsed.exportedAt))}`);
+      const metaLine = metaBits.length ? `<div style="margin-top:6px;color:var(--text-tertiary);font-size:10px">${metaBits.join(' · ')}</div>` : '';
+      els.importPreview.innerHTML = `${varLine}${pathLine}${metaLine}`;
+
+      els.importWarning.hidden = parsed.warnings.length === 0;
+      const warningText = parsed.warnings.slice(0, 4).join('；') + (parsed.warnings.length > 4 ? `；另有 ${parsed.warnings.length - 4} 条提示` : '');
+      els.importWarningText.textContent = warningText;
+      els.importConfirm.disabled = false;
+      els.importDialog.showModal();
+      updateDialogClass();
+      requestAnimationFrame(() => els.importCancel.focus());
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '无法读取这个文件。';
+      showToast(message, { type: 'error', duration: 5200 });
+    } finally {
+      els.importBtn.disabled = false;
+    }
+  }
+
+  function exportData() {
+    const paths = state.paths.map((item) => item.trim()).filter(Boolean);
+    const payload = {
+      format: 'win-env-studio',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      variables: state.variables.map((item) => ({ name: item.name, value: item.value })),
+      path: paths
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `windows-env-${dateStamp()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    const skipped = state.paths.length - paths.length;
+    showToast(
+      `已导出 ${payload.variables.length} 个变量、${paths.length} 条路径${skipped ? `（忽略 ${skipped} 条空路径）` : ''}`,
+      { type: 'success' }
+    );
+  }
+
+  function confirmImport() {
+    if (!pendingImport) {
+      els.importDialog.close();
+      return;
+    }
+    const snapshot = clone(state);
+    const counts = {
+      variables: pendingImport.data.variables.length,
+      paths: pendingImport.data.paths.length
+    };
+    state = clone(pendingImport.data);
+    pendingImport = null;
+    els.importDialog.close();
+    renderAll();
+    persistNow();
+    showToast(`已导入 ${counts.variables} 个变量、${counts.paths} 条路径`, {
+      type: 'success',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复导入前的数据', { type: 'success' });
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Search and clear                                                    */
+  /* ------------------------------------------------------------------ */
+
+  function onVarSearchInput() {
+    closeSuggest();
+    renderVariables();
+    syncSearchClearButtons();
+  }
+
+  function onPathSearchInput() {
+    closeSuggest();
+    renderPaths();
+    syncSearchClearButtons();
+  }
+
+  function clearVarSearch() {
+    els.varSearch.value = '';
+    onVarSearchInput();
+    els.varSearch.focus();
+  }
+
+  function clearPathSearch() {
+    els.pathSearch.value = '';
+    onPathSearchInput();
+    els.pathSearch.focus();
+  }
+
+  async function clearWorkspace() {
+    if (!state.variables.length && !state.paths.length) {
+      showToast('工作区已经是空的。', { type: 'info' });
+      return;
+    }
+    const confirmed = await askConfirm({
+      title: '清空工作区？',
+      description: '所有变量和 Path 条目都会被移除，随后可以通过提示条撤销。',
+      okLabel: '清空工作区'
+    });
+    if (!confirmed) return;
+    const snapshot = clone(state);
+    state = { variables: [], paths: [] };
+    renderAll();
+    persistNow();
+    showToast('工作区已清空', {
+      type: 'warning',
+      actionLabel: '撤销',
+      onAction: () => {
+        state = snapshot;
+        renderAll();
+        persistNow();
+        showToast('已恢复清空前的数据', { type: 'success' });
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Event wiring                                                        */
+  /* ------------------------------------------------------------------ */
+
+  function wireEvents() {
+    els.themeToggle.addEventListener('click', () => {
+      applyTheme(els.html.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
+
+    els.importBtn.addEventListener('click', () => {
+      els.fileInput.value = '';
+      els.fileInput.click();
+    });
+    els.exportBtn.addEventListener('click', exportData);
+    els.clearBtn.addEventListener('click', clearWorkspace);
+    els.addVarBtn.addEventListener('click', () => openVarDialog(null));
+    els.addPathBtn.addEventListener('click', addPath);
+    els.importPathTextBtn.addEventListener('click', openPathTextDialog);
+    els.copyPathBtn.addEventListener('click', copyAllPaths);
+
+    els.varSearch.addEventListener('input', onVarSearchInput);
+    els.varSearch.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && els.varSearch.value) {
+        event.preventDefault();
+        clearVarSearch();
+      }
+    });
+    els.pathSearch.addEventListener('input', onPathSearchInput);
+    els.pathSearch.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && els.pathSearch.value) {
+        event.preventDefault();
+        clearPathSearch();
+      }
+    });
+    els.clearVarSearch.addEventListener('click', clearVarSearch);
+    els.clearPathSearch.addEventListener('click', clearPathSearch);
+
+    els.varList.addEventListener('click', (event) => {
+      const actionEl = event.target.closest('[data-action]');
+      if (!actionEl) return;
+      const action = actionEl.dataset.action;
+      if (action === 'add-var') { openVarDialog(null); return; }
+      if (action === 'import-json') {
+        els.fileInput.value = '';
+        els.fileInput.click();
+        return;
+      }
+      if (action === 'clear-var-filter') { clearVarSearch(); return; }
+      const row = actionEl.closest('.var-row');
+      if (!row) return;
+      const index = Number(row.dataset.index);
+      if (action === 'edit') openVarDialog(index);
+      if (action === 'delete') deleteVariableAt(index);
+    });
+
+    els.pathList.addEventListener('click', (event) => {
+      const actionEl = event.target.closest('[data-action]');
+      if (!actionEl) return;
+      const action = actionEl.dataset.action;
+      if (action === 'add-path') { addPath(); return; }
+      if (action === 'clear-path-filter') { clearPathSearch(); return; }
+      const row = actionEl.closest('.path-row');
+      if (!row) return;
+      const index = Number(row.dataset.index);
+      if (action === 'up') movePath(index, -1);
+      if (action === 'down') movePath(index, 1);
+      if (action === 'delete') deletePathAt(index);
+    });
+
+    els.pathList.addEventListener('input', (event) => {
+      const input = event.target.closest('.path-input');
+      if (!input) return;
+      const index = Number(input.dataset.index);
+      if (!Number.isInteger(index) || state.paths[index] === undefined) return;
+      state.paths[index] = input.value;
+      updatePathRowWarning(input);
+      renderStats();
+      scheduleSave();
+      handleRefInput(input, event);
+    });
+
+    els.pathList.addEventListener('keydown', (event) => {
+      const input = event.target.closest('.path-input');
+      if (!input || event.isComposing) return;
+      const index = Number(input.dataset.index);
+      if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+        event.preventDefault();
+        movePath(index, event.key === 'ArrowUp' ? -1 : 1);
+        return;
+      }
+      if (event.key === 'Enter' && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+        if (suggestState.open && suggestState.items.length) return;
+        event.preventDefault();
+        closeSuggest();
+        state.paths.splice(index + 1, 0, '');
+        renderAll();
+        scheduleSave();
+        focusPathInput(index + 1);
+      }
+    });
+
+    els.pathList.addEventListener('paste', (event) => {
+      const input = event.target.closest('.path-input');
+      if (!input) return;
+      const text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
+      if (!text || !/[\r\n]/.test(text)) return;
+      const lines = text.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+      if (!lines.length) return;
+      event.preventDefault();
+      const index = Number(input.dataset.index);
+      state.paths.splice(index, 1, ...lines);
+      renderAll();
+      scheduleSave();
+      focusPathInput(index + lines.length - 1);
+    });
+
+    els.pathList.addEventListener('pointerdown', (event) => {
+      const handle = event.target.closest('.drag-handle');
+      if (!handle || els.pathList.classList.contains('is-filtered')) return;
+      dragArmed = true;
+      const row = handle.closest('.path-row');
+      if (row) row.setAttribute('draggable', 'true');
+    });
+
+    els.pathList.addEventListener('dragstart', (event) => {
+      const row = event.target.closest('.path-row');
+      if (!row || !dragArmed || els.pathList.classList.contains('is-filtered')) {
+        event.preventDefault();
+        return;
+      }
+      dragIndex = Number(row.dataset.index);
+      row.classList.add('dragging');
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', String(dragIndex));
+      }
+    });
+
+    els.pathList.addEventListener('dragover', (event) => {
+      if (dragIndex === null) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+      els.pathList.querySelectorAll('.path-row').forEach((row) => row.classList.remove('drop-before', 'drop-after'));
+      const row = event.target.closest('.path-row');
+      if (!row) {
+        dropTarget = null;
+        return;
+      }
+      const rect = row.getBoundingClientRect();
+      const insertBefore = event.clientY < rect.top + rect.height / 2;
+      row.classList.add(insertBefore ? 'drop-before' : 'drop-after');
+      dropTarget = { index: Number(row.dataset.index), insertBefore };
+    });
+
+    els.pathList.addEventListener('drop', (event) => {
+      event.preventDefault();
+      if (dragIndex !== null && dropTarget) {
+        reorderPath(dragIndex, dropTarget.index, dropTarget.insertBefore);
+      }
+      clearDragState();
+    });
+
+    els.pathList.addEventListener('dragend', clearDragState);
+    els.pathList.addEventListener('dragleave', (event) => {
+      if (!els.pathList.contains(event.relatedTarget)) {
+        els.pathList.querySelectorAll('.path-row').forEach((row) => row.classList.remove('drop-before', 'drop-after'));
+      }
+    });
+    els.pathList.addEventListener('scroll', closeSuggest, { passive: true });
+
+    document.addEventListener('pointerup', () => {
+      if (dragIndex === null) {
+        dragArmed = false;
+      }
+    });
+
+    els.varForm.addEventListener('submit', submitVariable);
+    els.varName.addEventListener('input', () => {
+      setVarNameError('');
+      updateRenameNote();
+    });
+    els.varValue.addEventListener('input', (event) => {
+      refreshVarRefPreview();
+      handleRefInput(event.target, event);
+    });
+    els.varValue.addEventListener('click', () => {
+      if (suggestState.open) refreshSuggest();
+    });
+    els.varDialogClose.addEventListener('click', () => els.varDialog.close());
+    els.varCancel.addEventListener('click', () => els.varDialog.close());
+    els.varDelete.addEventListener('click', () => {
+      if (!editingName) return;
+      const index = state.variables.findIndex((item) => sameName(item.name, editingName));
+      if (index === -1) return;
+      els.varDialog.close();
+      deleteVariableAt(index);
+    });
+
+    els.varDialog.addEventListener('close', () => {
+      closeSuggest();
+      editingName = null;
+      updateDialogClass();
+    });
+
+    els.importDialogClose.addEventListener('click', () => els.importDialog.close());
+    els.importCancel.addEventListener('click', () => els.importDialog.close());
+    els.importConfirm.addEventListener('click', confirmImport);
+    els.importDialog.addEventListener('close', () => {
+      pendingImport = null;
+      updateDialogClass();
+    });
+    els.importDialog.addEventListener('pointerdown', (event) => {
+      if (event.target === els.importDialog) els.importDialog.close();
+    });
+
+    els.pathTextInput.addEventListener('input', updatePathTextPreview);
+    els.readClipboardBtn.addEventListener('click', readClipboardIntoText);
+    els.pathTextConfirm.addEventListener('click', commitPathTextImport);
+    els.pathTextDialogClose.addEventListener('click', () => els.pathTextDialog.close());
+    els.pathTextCancel.addEventListener('click', () => els.pathTextDialog.close());
+    els.pathTextDialog.addEventListener('close', () => {
+      pendingPathText = null;
+      updateDialogClass();
+    });
+    els.pathTextDialog.addEventListener('pointerdown', (event) => {
+      if (event.target === els.pathTextDialog) els.pathTextDialog.close();
+    });
+
+    els.confirmOk.addEventListener('click', () => {
+      settleConfirm(true);
+      els.confirmDialog.close();
+    });
+    els.confirmCancel.addEventListener('click', () => els.confirmDialog.close());
+    els.confirmDialog.addEventListener('close', () => {
+      if (confirmResolver) settleConfirm(false);
+      updateDialogClass();
+    });
+    els.confirmDialog.addEventListener('pointerdown', (event) => {
+      if (event.target === els.confirmDialog) els.confirmDialog.close();
+    });
+
+    els.fileInput.addEventListener('change', () => {
+      const file = els.fileInput.files && els.fileInput.files[0];
+      els.fileInput.value = '';
+      if (!file) return;
+      openImportPreview(file);
+    });
+
+    els.suggestPopover.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+    });
+    els.suggestPopover.addEventListener('click', (event) => {
+      const option = event.target.closest('[data-suggest-index]');
+      if (!option) return;
+      commitSuggest(Number(option.dataset.suggestIndex));
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (!suggestState.open || event.target !== suggestState.input || event.isComposing) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!suggestState.items.length) return;
+        event.preventDefault();
+        event.stopPropagation();
+        moveSuggestActive(event.key === 'ArrowDown' ? 1 : -1);
+        return;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        if (!suggestState.items.length) return;
+        event.preventDefault();
+        event.stopPropagation();
+        commitSuggest(suggestState.active);
+        return;
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeSuggest();
+      }
+    }, true);
+
+    document.addEventListener('pointerdown', (event) => {
+      if (!suggestState.open) return;
+      if (event.target === suggestState.input) return;
+      if (els.suggestPopover.contains(event.target)) return;
+      closeSuggest();
+    });
+
+    document.addEventListener('focusin', (event) => {
+      if (!suggestState.open) return;
+      if (event.target === suggestState.input) return;
+      if (els.suggestPopover.contains(event.target)) return;
+      closeSuggest();
+    });
+
+    window.addEventListener('resize', () => {
+      if (suggestState.open && suggestState.input) positionSuggest(suggestState.input);
+    });
+    window.addEventListener('scroll', (event) => {
+      if (!suggestState.open) return;
+      if (els.suggestPopover.contains(event.target)) return;
+      closeSuggest();
+    }, true);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (document.querySelector('dialog[open]')) return;
+      const tag = event.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || event.target.isContentEditable) return;
+      event.preventDefault();
+      els.varSearch.focus();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (saveTimer) persistNow();
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Boot                                                                */
+  /* ------------------------------------------------------------------ */
+
+  function init() {
+    initTheme();
+    state = loadInitialState();
+    wireEvents();
+    renderAll();
+    if (restoredFromStorage) {
+      setSaveStatus('ok', '已恢复本地草稿', '已从当前浏览器的本地存储恢复上次编辑内容');
+    } else {
+      setSaveStatus('ok', '示例数据 · 自动保存', '当前展示示例数据，修改会自动保存在当前浏览器');
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
