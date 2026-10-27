@@ -998,6 +998,32 @@
   .group-action .icon { width: 13px; height: 13px; }
   .group-action:hover { color: var(--text); background: var(--surface-muted); }
   .group-action--danger:hover { color: var(--danger); background: var(--danger-soft); }
+  .group-collapse {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.14s ease, background-color 0.14s ease;
+  }
+  .group-collapse .icon {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.16s ease;
+  }
+  .group-block.is-collapsed .group-collapse .icon { transform: rotate(-90deg); }
+  .group-collapse:hover { color: var(--text); background: var(--surface-muted); }
+  /* 未分组组头没有折叠按钮，用占位保持色点对齐 */
+  .group-collapse-spacer { width: 18px; height: 18px; flex: 0 0 auto; }
+  /* 组内条目相对组头缩进，形成层级关系 */
+  .group-block > .var-row,
+  .group-block > .path-row { margin-left: 14px; }
   .group-block.is-off .group-head { border-style: dashed; }
   .group-block.is-off .group-name { color: var(--text-tertiary); text-decoration: line-through; }
   .path-row.is-off { opacity: 0.52; border-style: dashed; }
@@ -2453,7 +2479,9 @@
   }
 
   function groupHeadHtml(group, metaText, addLabel) {
+    const collapsed = Boolean(group.collapsed);
     return `<div class="group-head" data-group="${escAttr(group.id)}">
+      <button type="button" class="group-collapse" data-action="toggle-collapse" data-group="${escAttr(group.id)}" aria-expanded="${collapsed ? 'false' : 'true'}" title="${collapsed ? '展开分组' : '折叠分组'}" aria-label="${collapsed ? '展开分组' : '折叠分组'}">${iconMarkup('i-chevron-down')}</button>
       <span class="group-dot" style="--group-tone:${escAttr(groupTone(group.id))}" aria-hidden="true"></span>
       <button type="button" class="group-name" data-action="edit-group" data-group="${escAttr(group.id)}" title="编辑分组「${escAttr(group.name)}」">${esc(group.name)}</button>
       <span class="group-meta">${esc(metaText)}</span>
@@ -2469,10 +2497,34 @@
 
   function looseGroupHeadHtml(metaText) {
     return `<div class="group-head group-head--loose">
+      <span class="group-collapse-spacer" aria-hidden="true"></span>
       <span class="group-dot" style="--group-tone:var(--text-tertiary)" aria-hidden="true"></span>
       <span class="group-name group-name--static">未分组</span>
       <span class="group-meta">${esc(metaText)}</span>
     </div>`;
+  }
+
+  /** 返回是否发生了状态变更：调用方负责随后的 renderAll。 */
+  function setGroupCollapsed(id, collapsed) {
+    const group = groupById(id);
+    if (!group || Boolean(group.collapsed) === collapsed) return false;
+    group.collapsed = collapsed;
+    return true;
+  }
+
+  function toggleCollapse(id) {
+    const group = groupById(id);
+    if (!group) return;
+    group.collapsed = !group.collapsed;
+    renderAll();
+    persistNow();
+    if (!group.collapsed) {
+      requestAnimationFrame(() => {
+        const head = els.pathList.querySelector(`.group-head[data-group="${group.id}"]`)
+          || els.varList.querySelector(`.group-head[data-group="${group.id}"]`);
+        if (head) head.scrollIntoView({ block: 'nearest' });
+      });
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -2489,7 +2541,7 @@
       if (duplicate) return;
       let id = String(item.id ?? '').trim();
       if (!id || groups.some((group) => group.id === id)) id = newGroupId();
-      groups.push({ id, name, enabled: item.enabled !== false, capability: String(item.capability ?? '').trim() });
+      groups.push({ id, name, enabled: item.enabled !== false, capability: String(item.capability ?? '').trim(), collapsed: item.collapsed === true });
     });
 
     const resolveGroup = (value) => {
@@ -2758,11 +2810,14 @@
 
     els.varList.innerHTML = visibleBands.map((band) => {
       const isOff = band.group ? !band.group.enabled : false;
+      /* 搜索时强制展开，避免命中结果被折叠隐藏 */
+      const collapsed = band.group ? Boolean(band.group.collapsed) && !query : false;
       const head = band.group
         ? groupHeadHtml(band.group, `${band.items.length} 个`, '在此分组新增变量')
         : (state.groups.length ? looseGroupHeadHtml(`${band.items.length} 个`) : '');
-      const rows = band.items.map((item) => renderVarRow(item, query)).join('');
-      return `<section class="group-block group-block--vars${isOff ? ' is-off' : ''}" data-group="${band.group ? escAttr(band.group.id) : ''}">${head}${rows}</section>`;
+      const rows = collapsed ? '' : band.items.map((item) => renderVarRow(item, query)).join('');
+      const className = `group-block group-block--vars${isOff ? ' is-off' : ''}${collapsed ? ' is-collapsed' : ''}`;
+      return `<section class="${className}" data-group="${band.group ? escAttr(band.group.id) : ''}">${head}${rows}</section>`;
     }).join('');
   }
 
@@ -2850,6 +2905,7 @@
 
     els.pathList.innerHTML = visibleBands.map((band) => {
       const isOff = band.group ? !band.group.enabled : false;
+      const collapsed = band.group ? Boolean(band.group.collapsed) && !query : false;
       const first = band.items[0];
       const last = band.items[band.items.length - 1];
       const meta = band.items.length
@@ -2858,14 +2914,15 @@
       const head = band.group
         ? groupHeadHtml(band.group, meta, '在此分组添加路径')
         : (state.groups.length ? looseGroupHeadHtml(meta) : '');
-      const rows = band.items.map((item, position) => renderPathRow(item, {
+      const rows = collapsed ? '' : band.items.map((item, position) => renderPathRow(item, {
         query,
         filteredMode,
         isOff,
         isFirst: position === 0,
         isLast: position === band.items.length - 1
       })).join('');
-      return `<section class="group-block group-block--paths${isOff ? ' is-off' : ''}" data-group="${band.group ? escAttr(band.group.id) : ''}">${head}${rows}</section>`;
+      const className = `group-block group-block--paths${isOff ? ' is-off' : ''}${collapsed ? ' is-collapsed' : ''}`;
+      return `<section class="${className}" data-group="${band.group ? escAttr(band.group.id) : ''}">${head}${rows}</section>`;
     }).join('');
   }
 
@@ -3129,6 +3186,7 @@
     }
     const value = els.varValue.value;
     const groupId = groupById(els.varGroup.value) ? els.varGroup.value : null;
+    if (groupId) setGroupCollapsed(groupId, false);
     const isEdit = Boolean(editingName);
     if (isEdit) {
       const index = state.variables.findIndex((item) => sameName(item.name, editingName));
@@ -3187,8 +3245,10 @@
       els.pathSearch.value = '';
       syncSearchClearButtons();
     }
-    const entry = { value: '', groupId: groupById(groupId) ? groupId : null };
+    const targetGroup = groupById(groupId) ? groupId : null;
+    const entry = { value: '', groupId: targetGroup };
     state.paths.push(entry);
+    if (targetGroup) setGroupCollapsed(targetGroup, false);
     normalizePathOrder();
     renderAll();
     scheduleSave();
@@ -3315,6 +3375,7 @@
     const importedCount = result.entries.length;
     const duplicateCount = result.duplicates.length;
     const groupId = groupById(els.pathTextGroup.value) ? els.pathTextGroup.value : null;
+    if (groupId) setGroupCollapsed(groupId, false);
     if (els.pathSearch.value.trim()) {
       els.pathSearch.value = '';
       syncSearchClearButtons();
@@ -3524,7 +3585,7 @@
       group.capability = capability;
       message = `分组已更新为「${name}」`;
     } else {
-      const group = { id: newGroupId(), name, enabled: true, capability };
+      const group = { id: newGroupId(), name, enabled: true, capability, collapsed: false };
       state.groups.push(group);
       createdId = group.id;
       message = `已创建分组「${name}」`;
@@ -3940,7 +4001,7 @@
       if (groupIndex.has(key)) return groupIndex.get(key);
       let id = String(rawId ?? '').trim();
       if (!id || groups.some((group) => group.id === id)) id = `g-import-${groups.length + 1}`;
-      groups.push({ id, name, enabled: enabled !== false, capability: String(capability ?? '').trim() });
+      groups.push({ id, name, enabled: enabled !== false, capability: String(capability ?? '').trim(), collapsed: false });
       groupIndex.set(key, id);
       return id;
     };
@@ -4282,6 +4343,7 @@
       if (action === 'toggle-group') { toggleGroup(actionEl.dataset.group); return; }
       if (action === 'edit-group') { openGroupDialog(actionEl.dataset.group); return; }
       if (action === 'delete-group') { deleteGroup(actionEl.dataset.group); return; }
+      if (action === 'toggle-collapse') { toggleCollapse(actionEl.dataset.group); return; }
       if (action === 'add-to-group') { openVarDialog(null, '', actionEl.dataset.group); return; }
       const row = actionEl.closest('.var-row');
       if (!row) return;
@@ -4308,6 +4370,7 @@
       if (action === 'toggle-group') { toggleGroup(actionEl.dataset.group); return; }
       if (action === 'edit-group') { openGroupDialog(actionEl.dataset.group); return; }
       if (action === 'delete-group') { deleteGroup(actionEl.dataset.group); return; }
+      if (action === 'toggle-collapse') { toggleCollapse(actionEl.dataset.group); return; }
       if (action === 'add-to-group') { addPath(actionEl.dataset.group); return; }
       const row = actionEl.closest('.path-row');
       if (!row) return;
