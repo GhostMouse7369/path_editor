@@ -426,11 +426,22 @@
     line-height: 1.5;
     white-space: nowrap;
   }
+  button.stat { padding: 0; border: 0; background: none; font-family: inherit; }
   .stat strong { color: var(--text-secondary); font-weight: 650; font-variant-numeric: tabular-nums; }
   .stat-sep { width: 1px; height: 12px; background: var(--border); }
   .ref-stat { gap: 5px; color: var(--text-tertiary); font-weight: 500; }
   .ref-stat.is-ok { color: var(--success); }
-  .ref-stat.is-warn { color: var(--warning); }
+  .ref-stat.is-warn {
+    padding: 2px 8px;
+    border: 1px solid var(--warning-border);
+    border-radius: 999px;
+    color: var(--warning);
+    background: var(--warning-soft);
+    cursor: pointer;
+  }
+  .ref-stat.is-warn:hover { border-color: var(--warning); background: var(--warning-soft); }
+  .ref-stat.is-warn:hover span { text-decoration: underline; text-underline-offset: 2px; }
+  .ref-stat:disabled { cursor: default; }
   .ref-stat .icon { width: 13px; height: 13px; }
 
   /* ---------- Workspace panels ---------- */
@@ -677,15 +688,19 @@
     flex: 0 0 auto;
     display: inline-grid;
     place-items: center;
+    padding: 0;
     border-radius: 50%;
     color: var(--warning);
     background: var(--warning-soft);
     border: 1px solid var(--warning-border);
+    font-family: inherit;
     font-size: 9px;
     font-weight: 800;
     line-height: 1;
-    cursor: help;
+    cursor: pointer;
+    transition: background-color 0.14s ease, border-color 0.14s ease;
   }
+  .ref-warning:hover { background: var(--warning-border); border-color: var(--warning); }
   .var-value {
     display: block;
     width: 100%;
@@ -811,7 +826,8 @@
     text-align: center;
     user-select: none;
   }
-  .path-field { position: relative; min-width: 0; display: flex; align-items: center; }
+  .path-field { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
+  .path-input-wrap { position: relative; display: flex; align-items: center; min-width: 0; }
   .path-input {
     width: 100%;
     min-width: 0;
@@ -835,13 +851,49 @@
     height: 19px;
     display: inline-grid;
     place-items: center;
+    padding: 0;
     border-radius: 6px;
     color: var(--warning);
     background: var(--warning-soft);
     border: 1px solid var(--warning-border);
-    cursor: help;
+    cursor: pointer;
   }
+  .path-warning:hover { background: var(--warning-border); border-color: var(--warning); }
   .path-warning .icon { width: 11px; height: 11px; }
+  .path-unknowns {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding: 0 3px 1px;
+  }
+  .path-unknowns[hidden] { display: none; }
+  .path-unknowns-label {
+    color: var(--warning);
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .unknown-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    max-width: 100%;
+    padding: 1px 5px;
+    border-radius: 5px;
+    border: 1px solid var(--warning-border);
+    color: var(--warning);
+    background: var(--warning-soft);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 1.45;
+    cursor: pointer;
+    transition: border-color 0.14s ease, background-color 0.14s ease;
+  }
+  .unknown-chip:hover { border-color: var(--warning); background: var(--surface); }
+  .unknown-chip .icon { width: 10px; height: 10px; flex: 0 0 auto; }
+  .unknown-chip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .path-actions { display: flex; align-items: center; gap: 0; opacity: 0.6; transition: opacity 0.14s ease; }
   .path-row:hover .path-actions, .path-row:focus-within .path-actions { opacity: 1; }
   .path-action { width: 27px; height: 27px; border-radius: 6px; }
@@ -1141,6 +1193,45 @@
   #pathTextHint[data-tone="ok"] { color: var(--success); }
   .import-summary--three { grid-template-columns: repeat(3, 1fr); }
   #pathTextWarningText { word-break: break-word; }
+
+  #unknownDialog { width: min(460px, calc(100vw - 28px)); }
+  .modal-icon--warning {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: var(--warning-border);
+  }
+  .unknown-list { display: flex; flex-direction: column; gap: 6px; }
+  .unknown-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    background: var(--surface-subtle);
+    font-size: 11.5px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.14s ease, background-color 0.14s ease;
+  }
+  .unknown-item:hover { border-color: var(--warning-border); background: var(--warning-soft); }
+  .unknown-item-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-family: var(--font-mono);
+    font-weight: 650;
+    color: var(--warning);
+  }
+  .unknown-item-hint {
+    margin-left: auto;
+    flex: 0 0 auto;
+    color: var(--text-tertiary);
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .unknown-item .icon { width: 13px; height: 13px; flex: 0 0 auto; color: var(--warning); }
 
   #confirmDialog { width: min(440px, calc(100vw - 28px)); }
   .modal-card--sm { border-radius: 18px; }
@@ -1502,7 +1593,7 @@
       <span class="stat-sep" aria-hidden="true"></span>
       <span class="stat"><strong id="statPaths">0</strong> 条路径</span>
       <span class="stat-sep" aria-hidden="true"></span>
-      <span class="stat ref-stat" id="refStat">引用校验通过</span>
+      <button type="button" class="stat ref-stat" id="refStat" disabled>引用校验通过</button>
     </div>
     <button type="button" class="text-btn text-btn--danger" id="clearBtn">
       <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
@@ -1767,6 +1858,31 @@
   </div>
 </dialog>
 
+<dialog id="unknownDialog" aria-labelledby="unknownTitle">
+  <div class="modal-card modal-card--sm">
+    <header class="modal-header">
+      <div class="modal-icon modal-icon--warning" aria-hidden="true"><svg class="icon"><use href="#i-alert"></use></svg></div>
+      <div class="modal-heading">
+        <span class="modal-eyebrow">MISSING VARIABLES</span>
+        <h2 class="modal-title" id="unknownTitle">有变量尚未定义</h2>
+        <p class="modal-subtitle" id="unknownSubtitle">选择一个变量立即创建，名称会自动填入。</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="unknownDialogClose" aria-label="关闭">
+        <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <div class="unknown-list" id="unknownList"></div>
+    </div>
+    <footer class="modal-footer">
+      <span class="modal-footnote">创建后返回变量列表填写变量值</span>
+      <div class="footer-actions">
+        <button type="button" class="btn btn-secondary" id="unknownCancel">稍后处理</button>
+      </div>
+    </footer>
+  </div>
+</dialog>
+
 <dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription">
   <div class="modal-card modal-card--sm">
     <div class="confirm-body">
@@ -1916,6 +2032,11 @@
     confirmDescription: $('confirmDescription'),
     confirmOk: $('confirmOk'),
     confirmCancel: $('confirmCancel'),
+    unknownDialog: $('unknownDialog'),
+    unknownSubtitle: $('unknownSubtitle'),
+    unknownList: $('unknownList'),
+    unknownCancel: $('unknownCancel'),
+    unknownDialogClose: $('unknownDialogClose'),
     suggestPopover: $('suggestPopover'),
     toastStack: $('toastStack'),
     fileInput: $('fileInput')
@@ -1942,6 +2063,11 @@
     end: 0,
     query: ''
   };
+
+  const VAR_NAME_COLLATOR = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: 'base'
+  });
 
   /* ------------------------------------------------------------------ */
   /* Generic helpers                                                     */
@@ -2159,6 +2285,15 @@
     return unknown;
   }
 
+  function unknownChipHtml(name) {
+    return `<button type="button" class="unknown-chip" data-action="create-unknown-var" data-var-name="${escAttr(name)}" title="新建变量 ${escAttr(name)}">${iconMarkup('i-plus')}<span>%${esc(name)}%</span></button>`;
+  }
+
+  function pathUnknownsInnerHtml(names) {
+    if (!names.length) return '';
+    return `<span class="path-unknowns-label">未定义</span>${names.map(unknownChipHtml).join('')}`;
+  }
+
   function renderValueHTML(value, query) {
     const regex = /%([^%]+)%/g;
     let html = '';
@@ -2206,7 +2341,8 @@
     const lower = query.toLowerCase();
     const items = state.variables
       .map((item, index) => ({ ...item, index }))
-      .filter((item) => !lower || item.name.toLowerCase().includes(lower) || item.value.toLowerCase().includes(lower));
+      .filter((item) => !lower || item.name.toLowerCase().includes(lower) || item.value.toLowerCase().includes(lower))
+      .sort((a, b) => VAR_NAME_COLLATOR.compare(a.name, b.name) || a.index - b.index);
 
     els.varBadge.textContent = String(state.variables.length);
     els.varCountText.textContent = query
@@ -2236,8 +2372,9 @@
     els.varList.innerHTML = items.map((item) => {
       const valueEmpty = item.value.trim() === '';
       const unknown = unknownRefNames(item.value);
+      const warningTitle = unknown.length ? `未定义变量：${unknown.join('、')}；点击新建` : '';
       const warning = unknown.length
-        ? `<span class="ref-warning" title="${escAttr('未知变量引用：' + unknown.join('、'))}" aria-label="${escAttr('未知变量引用：' + unknown.join('、'))}">!</span>`
+        ? `<button type="button" class="ref-warning" data-action="create-unknown-vars" title="${escAttr(warningTitle)}" aria-label="${escAttr(warningTitle)}">!</button>`
         : '';
       return `<div class="var-row" role="listitem" data-index="${item.index}">
         <div class="var-ident">
@@ -2308,15 +2445,21 @@
 
     els.pathList.innerHTML = filtered.map((item) => {
       const warnings = getPathWarnings(item.value, item.index);
-      const warningTitle = warnings.join('；');
+      const unknown = unknownRefNames(item.value);
+      const warningTitle = unknown.length
+        ? `未定义变量：${unknown.join('、')}；点击新建`
+        : warnings.join('；');
       const isFirst = item.index === 0;
       const isLast = item.index === state.paths.length - 1;
       return `<div class="path-row" role="listitem" data-index="${item.index}" draggable="false">
         <button type="button" class="drag-handle" title="${filteredMode ? '筛选时不可拖动排序' : '拖动调整顺序'}" aria-label="拖动第 ${item.index + 1} 条路径排序" ${filteredMode ? 'disabled' : ''}>${iconMarkup('i-grip')}</button>
         <span class="path-index" aria-hidden="true">${String(item.index + 1).padStart(2, '0')}</span>
         <div class="path-field">
-          <input type="text" class="path-input" data-index="${item.index}" value="${escAttr(item.value)}" placeholder="例如 %SystemRoot%\\System32" autocomplete="off" spellcheck="false" aria-label="Path 第 ${item.index + 1} 条" aria-invalid="${warnings.length ? 'true' : 'false'}">
-          <span class="path-warning" ${warnings.length ? `title="${escAttr(warningTitle)}" aria-label="${escAttr(warningTitle)}" tabindex="0"` : 'hidden'}>${iconMarkup('i-alert')}</span>
+          <div class="path-input-wrap">
+            <input type="text" class="path-input" data-index="${item.index}" value="${escAttr(item.value)}" placeholder="例如 %SystemRoot%\\System32" autocomplete="off" spellcheck="false" aria-label="Path 第 ${item.index + 1} 条" aria-invalid="${warnings.length ? 'true' : 'false'}">
+            <button type="button" class="path-warning" data-action="show-path-warning" ${warnings.length ? `title="${escAttr(warningTitle)}" aria-label="${escAttr(warningTitle)}"` : 'hidden'}>${iconMarkup('i-alert')}</button>
+          </div>
+          <div class="path-unknowns" ${unknown.length ? '' : 'hidden'}>${pathUnknownsInnerHtml(unknown)}</div>
         </div>
         <div class="path-actions">
           <button type="button" class="path-action" data-action="up" title="${filteredMode ? '筛选时不可排序' : '上移'}" ${filteredMode || isFirst ? 'disabled' : ''} aria-label="上移第 ${item.index + 1} 条路径">${iconMarkup('i-chevron-up')}</button>
@@ -2334,13 +2477,17 @@
     if (unknown.size) {
       const names = Array.from(unknown.values());
       const preview = names.slice(0, 6).join('、') + (names.length > 6 ? ' 等' : '');
+      els.refStat.disabled = false;
       els.refStat.className = 'stat ref-stat is-warn';
       els.refStat.innerHTML = `${iconMarkup('i-alert')}<span>${unknown.size} 个未知引用</span>`;
-      els.refStat.title = `以下变量被引用但尚未定义：${preview}`;
+      els.refStat.title = `以下变量被引用但尚未定义：${preview}；点击可立即新建`;
+      els.refStat.setAttribute('aria-label', `发现 ${unknown.size} 个未定义变量，点击选择并新建。`);
     } else {
+      els.refStat.disabled = true;
       els.refStat.className = 'stat ref-stat is-ok';
       els.refStat.innerHTML = `${iconMarkup('i-check')}<span>引用校验通过</span>`;
       els.refStat.title = '所有 %变量名% 引用都能找到对应变量或系统内置变量';
+      els.refStat.removeAttribute('aria-label');
     }
   }
 
@@ -2354,16 +2501,25 @@
     if (!row) return;
     const index = Number(input.dataset.index);
     const warnings = getPathWarnings(input.value, index);
+    const unknown = unknownRefNames(input.value);
+    const warningTitle = unknown.length
+      ? `未定义变量：${unknown.join('、')}；点击新建`
+      : warnings.join('；');
     const warning = row.querySelector('.path-warning');
     if (warning) {
       warning.hidden = warnings.length === 0;
       if (warnings.length) {
-        warning.title = warnings.join('；');
-        warning.setAttribute('aria-label', warnings.join('；'));
+        warning.title = warningTitle;
+        warning.setAttribute('aria-label', warningTitle);
       } else {
         warning.removeAttribute('title');
         warning.removeAttribute('aria-label');
       }
+    }
+    const unknowns = row.querySelector('.path-unknowns');
+    if (unknowns) {
+      unknowns.hidden = unknown.length === 0;
+      unknowns.innerHTML = pathUnknownsInnerHtml(unknown);
     }
     input.setAttribute('aria-invalid', warnings.length ? 'true' : 'false');
   }
@@ -2403,19 +2559,57 @@
     });
   }
 
-  function openVarDialog(index) {
+  function openMissingVariableCreator(names) {
+    const missing = [];
+    const seen = new Set();
+    names.forEach((rawName) => {
+      const name = String(rawName || '').trim();
+      if (!name) return;
+      const key = name.toLowerCase();
+      if (seen.has(key) || isKnownRef(name)) return;
+      seen.add(key);
+      missing.push(name);
+    });
+
+    if (!missing.length) {
+      showToast('没有发现可以新建的未定义变量。', { type: 'info' });
+      return;
+    }
+    if (missing.length === 1) {
+      openVarDialog(null, missing[0]);
+      return;
+    }
+
+    els.unknownSubtitle.textContent = `发现 ${missing.length} 个未定义变量，选择一个立即创建。`;
+    els.unknownList.innerHTML = missing.map((name) => `<button type="button" class="unknown-item" data-unknown-name="${escAttr(name)}" title="新建变量 ${escAttr(name)}">
+        ${iconMarkup('i-alert')}
+        <span class="unknown-item-name">%${esc(name)}%</span>
+        <span class="unknown-item-hint">新建变量</span>
+      </button>`).join('');
+    els.unknownDialog.showModal();
+    updateDialogClass();
+    requestAnimationFrame(() => {
+      const first = els.unknownList.querySelector('button');
+      if (first) first.focus();
+    });
+  }
+
+  function openVarDialog(index, presetName = '') {
     const item = typeof index === 'number' ? state.variables[index] : null;
     editingName = item ? item.name : null;
     const isEdit = Boolean(item);
+    const preset = isEdit ? '' : String(presetName || '').trim();
 
     els.varDialogEyebrow.textContent = isEdit ? 'EDIT VARIABLE' : 'NEW VARIABLE';
     els.varDialogTitle.textContent = isEdit ? '编辑变量' : '新增变量';
     els.varDialogSubtitle.textContent = isEdit
       ? '修改名称或值。如果重命名，其他值和 Path 中的引用会自动同步。'
-      : '添加一个可在 Path 中通过 %变量名% 引用的变量。';
+      : preset
+        ? `正在创建被引用但尚未定义的变量「${preset}」，名称已自动填入。`
+        : '添加一个可在 Path 中通过 %变量名% 引用的变量。';
     els.varSave.textContent = isEdit ? '保存更改' : '保存变量';
     els.varDelete.hidden = !isEdit;
-    els.varName.value = item ? item.name : '';
+    els.varName.value = item ? item.name : preset;
     els.varValue.value = item ? item.value : '';
     els.renameNote.hidden = true;
     setVarNameError('');
@@ -2424,8 +2618,14 @@
     els.varDialog.showModal();
     updateDialogClass();
     requestAnimationFrame(() => {
-      els.varName.focus();
-      if (isEdit) els.varName.select();
+      if (isEdit) {
+        els.varName.focus();
+        els.varName.select();
+      } else if (preset) {
+        els.varValue.focus();
+      } else {
+        els.varName.focus();
+      }
     });
   }
 
@@ -3391,6 +3591,11 @@
     els.clearVarSearch.addEventListener('click', clearVarSearch);
     els.clearPathSearch.addEventListener('click', clearPathSearch);
 
+    els.refStat.addEventListener('click', () => {
+      if (els.refStat.disabled) return;
+      openMissingVariableCreator(Array.from(collectUnknownRefs().values()));
+    });
+
     els.varList.addEventListener('click', (event) => {
       const actionEl = event.target.closest('[data-action]');
       if (!actionEl) return;
@@ -3405,6 +3610,11 @@
       const row = actionEl.closest('.var-row');
       if (!row) return;
       const index = Number(row.dataset.index);
+      if (action === 'create-unknown-vars') {
+        const item = state.variables[index];
+        openMissingVariableCreator(unknownRefNames(item ? item.value : ''));
+        return;
+      }
       if (action === 'edit') openVarDialog(index);
       if (action === 'delete') deleteVariableAt(index);
     });
@@ -3415,9 +3625,24 @@
       const action = actionEl.dataset.action;
       if (action === 'add-path') { addPath(); return; }
       if (action === 'clear-path-filter') { clearPathSearch(); return; }
+      if (action === 'create-unknown-var') {
+        openMissingVariableCreator([actionEl.dataset.varName]);
+        return;
+      }
       const row = actionEl.closest('.path-row');
       if (!row) return;
       const index = Number(row.dataset.index);
+      if (action === 'show-path-warning') {
+        const input = row.querySelector('.path-input');
+        const value = input ? input.value : (state.paths[index] || '');
+        const unknown = unknownRefNames(value);
+        if (unknown.length) {
+          openMissingVariableCreator(unknown);
+        } else {
+          showToast(getPathWarnings(value, index).join('；'), { type: 'warning' });
+        }
+        return;
+      }
       if (action === 'up') movePath(index, -1);
       if (action === 'down') movePath(index, 1);
       if (action === 'delete') deletePathAt(index);
@@ -3580,6 +3805,20 @@
     });
     els.pathTextDialog.addEventListener('pointerdown', (event) => {
       if (event.target === els.pathTextDialog) els.pathTextDialog.close();
+    });
+
+    els.unknownList.addEventListener('click', (event) => {
+      const item = event.target.closest('[data-unknown-name]');
+      if (!item) return;
+      const name = item.dataset.unknownName;
+      els.unknownDialog.close();
+      openVarDialog(null, name);
+    });
+    els.unknownCancel.addEventListener('click', () => els.unknownDialog.close());
+    els.unknownDialogClose.addEventListener('click', () => els.unknownDialog.close());
+    els.unknownDialog.addEventListener('close', updateDialogClass);
+    els.unknownDialog.addEventListener('pointerdown', (event) => {
+      if (event.target === els.unknownDialog) els.unknownDialog.close();
     });
 
     els.confirmOk.addEventListener('click', () => {
