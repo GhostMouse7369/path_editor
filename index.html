@@ -589,14 +589,14 @@
     white-space: nowrap;
   }
   .filter-lock .icon { width: 12px; height: 12px; }
-  .path-text-tools {
+  .text-tools {
     display: flex;
     align-items: center;
     gap: 2px;
     flex: 0 0 auto;
     margin-left: auto;
   }
-  .path-text-tools .text-btn { padding: 6px; font-size: 11px; white-space: nowrap; }
+  .text-tools .text-btn { padding: 6px; font-size: 11px; white-space: nowrap; }
   .path-text-divider { width: 1px; height: 16px; margin: 0 2px; background: var(--border); }
 
   .path-tip {
@@ -819,13 +819,24 @@
   .drag-handle .icon { width: 13px; height: 17px; }
   .path-list.is-filtered .drag-handle { opacity: 0.2; cursor: not-allowed; }
   .path-index {
+    width: 100%;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
     color: var(--text-tertiary);
+    background: transparent;
     font-family: var(--font-mono);
     font-size: 9.5px;
     font-variant-numeric: tabular-nums;
     text-align: center;
     user-select: none;
+    cursor: pointer;
+    transition: color 0.14s ease, background-color 0.14s ease;
   }
+  .path-index:hover { color: var(--accent); background: var(--surface-muted); }
   .path-field { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
   .path-input-wrap { position: relative; display: flex; align-items: center; min-width: 0; }
   .path-input {
@@ -998,6 +1009,50 @@
   .group-action .icon { width: 13px; height: 13px; }
   .group-action:hover { color: var(--text); background: var(--surface-muted); }
   .group-action--danger:hover { color: var(--danger); background: var(--danger-soft); }
+
+  /* ---------- 分组 / 单条复制菜单 ---------- */
+  #copyMenu {
+    position: fixed;
+    z-index: 60;
+    min-width: 192px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel-solid);
+    box-shadow: var(--shadow-popover);
+  }
+  #copyMenu[hidden] { display: none; }
+  .copy-menu-hint {
+    padding: 3px 9px 5px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+  .copy-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 9px;
+    border: 0;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.14s ease, background-color 0.14s ease;
+  }
+  .copy-menu-item .icon { width: 13px; height: 13px; color: var(--text-tertiary); }
+  .copy-menu-item:hover { color: var(--text); background: var(--surface-muted); }
+  .copy-menu-item:disabled { opacity: 0.45; cursor: not-allowed; }
+  .copy-menu-item:disabled:hover { color: var(--text-secondary); background: transparent; }
   .group-collapse {
     width: 18px;
     height: 18px;
@@ -1608,7 +1663,7 @@
     .panel-header { padding: 15px 15px 12px; }
     .panel-subtitle { display: none; }
     .panel-toolbar { padding: 0 15px 10px; flex-wrap: wrap; }
-    .path-text-tools { flex: 1 1 100%; justify-content: flex-end; }
+    .text-tools { flex: 1 1 100%; justify-content: flex-end; }
     .path-tip { margin: 0 15px 10px; }
     .var-columns { display: none; }
     .var-list { padding: 2px 8px 10px; }
@@ -1621,8 +1676,9 @@
     .var-value { grid-column: 1; grid-row: 2; padding-left: 13px; font-size: 10.5px; }
     .var-actions { grid-column: 2; grid-row: 1 / span 2; opacity: 0.8; }
     .path-list { padding: 8px 11px 12px; }
-    .path-row { grid-template-columns: minmax(0, 1fr) auto; gap: 5px; padding: 7px 7px 7px 8px; }
-    .drag-handle, .path-index { display: none; }
+    .path-row { grid-template-columns: 22px minmax(0, 1fr) auto; gap: 5px; padding: 7px 7px 7px 6px; }
+    .drag-handle { display: none; }
+    .path-index { width: 22px; height: 24px; font-size: 9px; }
     .path-actions { opacity: 0.85; }
     .path-action { width: 26px; height: 26px; }
     .panel-footer { padding: 8px 15px; }
@@ -1780,6 +1836,12 @@
             <svg class="icon icon--xs" aria-hidden="true"><use href="#i-x"></use></svg>
           </button>
         </div>
+        <div class="text-tools">
+          <button type="button" class="text-btn" id="copyVarBtn" title="复制全部变量到剪贴板（每行 NAME=VALUE）">
+            <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>
+            <span>复制全部</span>
+          </button>
+        </div>
       </div>
       <div class="table-shell">
         <div class="var-columns" id="varColumns" aria-hidden="true">
@@ -1831,7 +1893,7 @@
           <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
           排序已锁定
         </span>
-        <div class="path-text-tools">
+        <div class="text-tools">
           <button type="button" class="text-btn" id="importPathTextBtn" title="从换行或分号分隔的 Path 文本导入">
             <svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>
             <span>粘贴导入</span>
@@ -2168,6 +2230,7 @@
 </dialog>
 
 <div class="suggest-popover" id="suggestPopover" hidden></div>
+<div id="copyMenu" hidden></div>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
 <input type="file" id="fileInput" accept=".json,application/json" hidden>
 
@@ -2259,6 +2322,7 @@
     pathFilterLock: $('pathFilterLock'),
     importPathTextBtn: $('importPathTextBtn'),
     copyPathBtn: $('copyPathBtn'),
+    copyVarBtn: $('copyVarBtn'),
     pathList: $('pathList'),
     pathBadge: $('pathBadge'),
     pathCountText: $('pathCountText'),
@@ -2334,6 +2398,7 @@
     movePathCancel: $('movePathCancel'),
     movePathDialogClose: $('movePathDialogClose'),
     suggestPopover: $('suggestPopover'),
+    copyMenu: $('copyMenu'),
     toastStack: $('toastStack'),
     fileInput: $('fileInput')
   };
@@ -2545,6 +2610,7 @@
       <span class="group-meta">${esc(metaText)}</span>
       ${groupChipsHtml(group)}
       <div class="group-actions">
+        <button type="button" class="group-action" data-action="copy-group" data-group="${escAttr(group.id)}" title="复制分组内容" aria-label="复制分组「${escAttr(group.name)}」的内容">${iconMarkup('i-copy')}</button>
         <button type="button" class="group-action" data-action="add-to-group" data-group="${escAttr(group.id)}" title="${escAttr(addLabel)}" aria-label="${escAttr(addLabel)}">${iconMarkup('i-plus')}</button>
         <button type="button" class="group-action" data-action="toggle-group" data-group="${escAttr(group.id)}" title="${group.enabled ? '停用分组（Path 不参与复制与导出）' : '启用分组'}" aria-label="${group.enabled ? '停用分组' : '启用分组'}">${iconMarkup('i-power')}</button>
         <button type="button" class="group-action" data-action="edit-group" data-group="${escAttr(group.id)}" title="编辑分组" aria-label="编辑分组「${escAttr(group.name)}」">${iconMarkup('i-edit')}</button>
@@ -2559,6 +2625,9 @@
       <span class="group-dot" style="--group-tone:var(--text-tertiary)" aria-hidden="true"></span>
       <span class="group-name group-name--static">未分组</span>
       <span class="group-meta">${esc(metaText)}</span>
+      <div class="group-actions">
+        <button type="button" class="group-action" data-action="copy-group" data-group="" title="复制未分组内容" aria-label="复制未分组的内容">${iconMarkup('i-copy')}</button>
+      </div>
     </div>`;
   }
 
@@ -2900,6 +2969,7 @@
       </div>
       <button type="button" class="var-value${valueEmpty ? ' is-empty' : ''}" data-action="edit" title="${escAttr(item.value || '（空值）')}">${valueEmpty ? '（空值）' : renderValueHTML(item.value, query)}</button>
       <div class="var-actions">
+        <button type="button" class="row-action" data-action="copy-variable" title="复制 ${escAttr(item.name)}=…" aria-label="复制变量 ${escAttr(item.name)}">${iconMarkup('i-copy')}</button>
         <button type="button" class="row-action" data-action="edit" title="编辑 ${escAttr(item.name)}" aria-label="编辑 ${escAttr(item.name)}">${iconMarkup('i-edit')}</button>
         <button type="button" class="row-action row-action--danger" data-action="delete" title="删除 ${escAttr(item.name)}" aria-label="删除 ${escAttr(item.name)}">${iconMarkup('i-trash')}</button>
       </div>
@@ -2999,7 +3069,7 @@
     const { query, filteredMode, isOff, isFirst, isLast } = options;
     return `<div class="path-row${isOff ? ' is-off' : ''}" role="listitem" data-index="${item.index}" data-group="${item.groupId ? escAttr(item.groupId) : ''}" draggable="false">
         <button type="button" class="drag-handle" title="${filteredMode ? '筛选时不可拖动排序' : '拖动调整顺序或移动到其他分组'}" aria-label="拖动第 ${item.index + 1} 条路径排序" ${filteredMode ? 'disabled' : ''}>${iconMarkup('i-grip')}</button>
-        <span class="path-index" aria-hidden="true">${String(item.index + 1).padStart(2, '0')}</span>
+        <button type="button" class="path-index" data-action="copy-path" title="复制第 ${item.index + 1} 条路径" aria-label="复制第 ${item.index + 1} 条路径">${String(item.index + 1).padStart(2, '0')}</button>
         <div class="path-field">
           <div class="path-input-wrap">
             <input type="text" class="path-input" data-index="${item.index}" value="${escAttr(item.value)}" placeholder="例如 %SystemRoot%\\System32" autocomplete="off" spellcheck="false" aria-label="Path 第 ${item.index + 1} 条" aria-invalid="${warnings.length ? 'true' : 'false'}">
@@ -3509,6 +3579,120 @@
       `已复制 ${paths.length} 条路径${skipped ? `，跳过 ${skipped} 条停用分组条目` : ''}（分号分隔，可直接粘贴到 Windows Path）`,
       { type: 'success' }
     );
+  }
+
+  /* ---------- 分组 / 单条复制 ---------- */
+  let copyMenuGroupId = null;
+
+  function groupPathEntries(groupId) {
+    return state.paths
+      .filter((item) => (item.groupId || null) === (groupId || null))
+      .filter((item) => isGroupEnabled(item.groupId))
+      .map((item) => item.value.trim())
+      .filter(Boolean);
+  }
+
+  function groupVariableLines(groupId) {
+    return state.variables
+      .filter((item) => (item.groupId || null) === (groupId || null))
+      .map((item) => `${item.name}=${item.value}`);
+  }
+
+  function closeCopyMenu() {
+    els.copyMenu.hidden = true;
+    els.copyMenu.innerHTML = '';
+    copyMenuGroupId = null;
+  }
+
+  function openCopyMenu(anchor, groupId) {
+    const group = groupId ? groupById(groupId) : null;
+    const label = group ? group.name : '未分组';
+    const vars = groupVariableLines(groupId);
+    const paths = groupPathEntries(groupId);
+    copyMenuGroupId = groupId || null;
+    els.copyMenu.innerHTML = `
+      <div class="copy-menu-hint">${esc(label)} · ${vars.length} 变量 · ${paths.length} Path</div>
+      <button type="button" class="copy-menu-item" data-copy="vars" ${vars.length ? '' : 'disabled'}>${iconMarkup('i-percent')}复制变量（每行 NAME=VALUE）</button>
+      <button type="button" class="copy-menu-item" data-copy="paths" ${paths.length ? '' : 'disabled'}>${iconMarkup('i-route')}复制 Path（分号分隔）</button>
+      <button type="button" class="copy-menu-item" data-copy="all" ${vars.length || paths.length ? '' : 'disabled'}>${iconMarkup('i-copy')}复制本组全部</button>`;
+    els.copyMenu.hidden = false;
+    const rect = anchor.getBoundingClientRect();
+    const menu = els.copyMenu.getBoundingClientRect();
+    const left = Math.max(10, Math.min(rect.right - menu.width, window.innerWidth - menu.width - 10));
+    let top = rect.bottom + 6;
+    if (top + menu.height > window.innerHeight - 10) top = rect.top - menu.height - 6;
+    top = Math.max(10, Math.min(top, window.innerHeight - menu.height - 10));
+    els.copyMenu.style.left = `${left}px`;
+    els.copyMenu.style.top = `${top}px`;
+  }
+
+  async function copyGroupPart(groupId, part) {
+    const group = groupId ? groupById(groupId) : null;
+    const label = group ? group.name : '未分组';
+    const vars = groupVariableLines(groupId);
+    const paths = groupPathEntries(groupId);
+    let text = '';
+    let description = '';
+    if (part === 'vars') {
+      text = vars.join('\n');
+      description = `${vars.length} 个变量`;
+    } else if (part === 'paths') {
+      text = paths.join(';');
+      description = `${paths.length} 条 Path`;
+    } else {
+      text = [vars.join('\n'), paths.join(';')].filter(Boolean).join('\n\n');
+      description = `${vars.length} 个变量、${paths.length} 条 Path`;
+    }
+    if (!text.trim()) {
+      showToast(`「${label}」没有可复制的内容（停用分组的 Path 不参与复制）。`, { type: 'info' });
+      return;
+    }
+    const copied = await writeClipboardText(text);
+    if (!copied) {
+      showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
+      return;
+    }
+    showToast(`已复制「${label}」的 ${description}`, { type: 'success' });
+  }
+
+  async function copyVariableAt(index) {
+    const item = state.variables[index];
+    if (!item) return;
+    const copied = await writeClipboardText(`${item.name}=${item.value}`);
+    if (!copied) {
+      showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
+      return;
+    }
+    const preview = item.value.length > 42 ? `${item.value.slice(0, 42)}…` : item.value;
+    showToast(`已复制 ${item.name}=${preview || '（空值）'}`, { type: 'success' });
+  }
+
+  async function copyPathAt(index) {
+    const item = state.paths[index];
+    if (!item || !item.value.trim()) {
+      showToast('这条路径还是空的，没有可复制的内容。', { type: 'info' });
+      return;
+    }
+    const copied = await writeClipboardText(item.value.trim());
+    if (!copied) {
+      showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
+      return;
+    }
+    showToast(`已复制第 ${index + 1} 条路径`, { type: 'success' });
+  }
+
+  async function copyAllVariables() {
+    if (!state.variables.length) {
+      showToast('还没有变量可复制。', { type: 'info' });
+      return;
+    }
+    const lines = state.variables.map((item) => `${item.name}=${item.value}`);
+    const copied = await writeClipboardText(lines.join('\n'));
+    if (!copied) {
+      showToast('复制失败，浏览器未允许访问剪贴板。', { type: 'error', duration: 5200 });
+      return;
+    }
+    showToast(`已复制 ${lines.length} 个变量（每行 NAME=VALUE）`, { type: 'success' });
   }
 
   function movePath(index, delta) {
@@ -4422,6 +4606,7 @@
     els.addGroupBtn.addEventListener('click', () => openGroupDialog(null));
     els.importPathTextBtn.addEventListener('click', () => openPathTextDialog());
     els.copyPathBtn.addEventListener('click', copyAllPaths);
+    els.copyVarBtn.addEventListener('click', copyAllVariables);
 
     els.varSearch.addEventListener('input', onVarSearchInput);
     els.varSearch.addEventListener('keydown', (event) => {
@@ -4460,10 +4645,12 @@
       if (action === 'edit-group') { openGroupDialog(actionEl.dataset.group); return; }
       if (action === 'delete-group') { deleteGroup(actionEl.dataset.group); return; }
       if (action === 'toggle-collapse') { toggleCollapse(actionEl.dataset.group); return; }
+      if (action === 'copy-group') { openCopyMenu(actionEl, actionEl.dataset.group || null); return; }
       if (action === 'add-to-group') { openVarDialog(null, '', actionEl.dataset.group); return; }
       const row = actionEl.closest('.var-row');
       if (!row) return;
       const index = Number(row.dataset.index);
+      if (action === 'copy-variable') { copyVariableAt(index); return; }
       if (action === 'create-unknown-vars') {
         const item = state.variables[index];
         openMissingVariableCreator(unknownRefNames(item ? item.value : ''));
@@ -4487,10 +4674,12 @@
       if (action === 'edit-group') { openGroupDialog(actionEl.dataset.group); return; }
       if (action === 'delete-group') { deleteGroup(actionEl.dataset.group); return; }
       if (action === 'toggle-collapse') { toggleCollapse(actionEl.dataset.group); return; }
+      if (action === 'copy-group') { openCopyMenu(actionEl, actionEl.dataset.group || null); return; }
       if (action === 'add-to-group') { addPath(actionEl.dataset.group); return; }
       const row = actionEl.closest('.path-row');
       if (!row) return;
       const index = Number(row.dataset.index);
+      if (action === 'copy-path') { copyPathAt(index); return; }
       if (action === 'show-path-warning') {
         const input = row.querySelector('.path-input');
         const value = input ? input.value : (state.paths[index] ? state.paths[index].value : '');
@@ -4612,6 +4801,26 @@
       }
     });
     els.pathList.addEventListener('scroll', closeSuggest, { passive: true });
+
+    els.copyMenu.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-copy]');
+      if (!button || els.copyMenu.hidden) return;
+      const groupId = copyMenuGroupId;
+      closeCopyMenu();
+      copyGroupPart(groupId, button.dataset.copy);
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (els.copyMenu.hidden) return;
+      if (els.copyMenu.contains(event.target)) return;
+      if (event.target.closest('[data-action="copy-group"]')) return;
+      closeCopyMenu();
+    });
+    window.addEventListener('scroll', () => {
+      if (!els.copyMenu.hidden) closeCopyMenu();
+    }, true);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !els.copyMenu.hidden) closeCopyMenu();
+    });
 
     document.addEventListener('pointerup', () => {
       if (dragIndex === null) {
